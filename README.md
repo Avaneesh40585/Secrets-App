@@ -30,7 +30,8 @@ A modern anonymous secret-sharing application built with Node.js, Express, Passp
 
 ## Demo
 
-*Add your demo screenshot or GIF here*
+![Secrets-App Demo](https://github.com/user-attachments/assets/9ce2006c-67e5-4112-bc3e-410a51f6fbd9)
+
 
 ## Folder Structure
 ```
