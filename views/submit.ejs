@@ -1,0 +1,41 @@
+<%- include('partials/header') %>
+
+<div class="main-container">
+  <div class="submit-form">
+    <div class="logo">
+      <i class="fas fa-user-secret fa-4x"></i>
+      <h1>Share a Secret</h1>
+      <p>What would you like to tell the world anonymously?</p>
+    </div>
+
+    <% if (currentSecret) { %>
+      <div class="current-secret-display">
+        <h3>Your Current Secret:</h3>
+        <div class="current-secret-text">
+          "<%= currentSecret %>"
+        </div>
+        <p class="update-note">Sharing a new secret will replace your current one.</p>
+      </div>
+    <% } %>
+
+    <form action="/submit" method="POST">
+      <textarea 
+        name="secret" 
+        placeholder="<%= currentSecret ? 'Enter your new secret here...' : 'Type your secret here...' %>" 
+        required
+        maxlength="500"
+      ><%= currentSecret || '' %></textarea>
+      
+      <div class="hero-buttons">
+        <button type="submit" class="btn btn-primary">
+          <%= currentSecret ? 'Update Secret' : 'Share Secret' %>
+        </button>
+        <a href="/secrets" class="btn btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<%- include('partials/footer') %>
+
