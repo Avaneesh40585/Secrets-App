@@ -1,0 +1,55 @@
+databases:
+  - name: secrets-db
+    databaseName: secrets_production
+    user: secrets_user
+    region: oregon
+    plan: free
+
+services:
+  - type: web
+    name: secrets-app
+    runtime: node
+    region: oregon
+    plan: free
+    branch: main
+    
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /
+    autoDeploy: true
+    
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+      
+      # Database connection
+      - key: PG_HOST
+        fromDatabase:
+          name: secrets-db
+          property: host
+      - key: PG_DATABASE
+        fromDatabase:
+          name: secrets-db
+          property: database
+      - key: PG_USER
+        fromDatabase:
+          name: secrets-db
+          property: user
+      - key: PG_PASSWORD
+        fromDatabase:
+          name: secrets-db
+          property: password
+      - key: PG_PORT
+        value: "5432"
+      
+      # Session and authentication
+      - key: SESSION_SECRET
+        generateValue: true
+      
+      # Google OAuth (set manually in dashboard)
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false

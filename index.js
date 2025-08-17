@@ -8,9 +8,47 @@ import session from "express-session";
 import env from "dotenv";
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 const saltRounds = 10;
 env.config();
+
+const db = new pg.Pool({
+  user: process.env.PG_USER,
+  host: process.env.PG_HOST,
+  database: process.env.PG_DATABASE,
+  password: process.env.PG_PASSWORD,
+  port: process.env.PG_PORT,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
+});
+
+// Database initialization function
+async function initializeDatabase() {
+  try {
+    console.log("Creating users table...");
+    
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(100) NOT NULL UNIQUE,
+        password VARCHAR(255),
+        secret TEXT,
+        provider VARCHAR(32) DEFAULT 'local'
+      )
+    `);
+    console.log("Users table created successfully");
+    
+    await db.query(`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`);
+    await db.query(`CREATE INDEX IF NOT EXISTS idx_users_provider ON users(provider)`);
+    console.log("Database indexes created");
+    
+  } catch (err) {
+    console.error("Error creating database:", err);
+    throw err;
+  }
+}
 
 app.use(
   session({
@@ -21,22 +59,12 @@ app.use(
 );
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
+app.set('view engine', 'ejs');
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-const db = new pg.Pool({
-  user: process.env.PG_USER,
-  host: process.env.PG_HOST,
-  database: process.env.PG_DATABASE,
-  password: process.env.PG_PASSWORD,
-  port: process.env.PG_PORT,
-  max: 20, // maximum number of clients in the pool
-  idleTimeoutMillis: 30000, // close idle clients after 30 seconds
-  connectionTimeoutMillis: 2000, // return an error after 2 seconds if connection cannot be established
-});
-
-// --- ROUTES ---
+// Routes
 app.get("/", (req, res) => res.render("home.ejs"));
 
 app.get("/login", (req, res) => res.render("login.ejs"));
@@ -53,7 +81,6 @@ app.get("/logout", (req, res, next) => {
 app.get("/secrets", async (req, res) => {
   if (req.isAuthenticated()) {
     try {
-      // Check if user has shared a secret
       const userSecretCheck = await db.query(
         `SELECT secret FROM users WHERE email = $1`,
         [req.user.email]
@@ -68,7 +95,6 @@ app.get("/secrets", async (req, res) => {
         });
       }
       
-      // Get all secrets from all users
       const result = await db.query(
         `SELECT secret FROM users WHERE secret IS NOT NULL AND secret != '' ORDER BY RANDOM()`
       );
@@ -77,7 +103,7 @@ app.get("/secrets", async (req, res) => {
       res.render("secrets.ejs", { secrets: secrets, needsSecret: false });
       
     } catch (err) {
-      console.log(err);
+      console.log("Error loading secrets:", err);
       res.render("secrets.ejs", { secrets: ["Error loading secrets."] });
     }
   } else {
@@ -85,11 +111,9 @@ app.get("/secrets", async (req, res) => {
   }
 });
 
-
 app.get("/submit", async (req, res) => {
   if (req.isAuthenticated()) {
     try {
-      // Get user's current secret
       const result = await db.query(
         `SELECT secret FROM users WHERE email = $1`,
         [req.user.email]
@@ -98,14 +122,13 @@ app.get("/submit", async (req, res) => {
       const currentSecret = result.rows[0]?.secret || null;
       res.render("submit.ejs", { currentSecret: currentSecret });
     } catch (err) {
-      console.log(err);
+      console.log("Error loading submit page:", err);
       res.render("submit.ejs", { currentSecret: null });
     }
   } else {
     res.redirect("/login");
   }
 });
-
 
 app.get(
   "/auth/google",
@@ -130,12 +153,10 @@ app.post(
   })
 );
 
-// --- USER REGISTRATION WITH VALIDATION ---
 app.post("/register", async (req, res) => {
   const email = req.body.username;
   const password = req.body.password;
 
-  // Input validation
   if (!email.match(/^[^@\s]+@[^@\s]+\.[^@\s]+$/)) {
     return res.render("register.ejs", { error: "Invalid email format." });
   }
@@ -168,12 +189,11 @@ app.post("/register", async (req, res) => {
       });
     }
   } catch (err) {
-    console.log(err);
+    console.log("Registration error:", err);
     res.render("register.ejs", { error: "Registration failed." });
   }
 });
 
-// --- SECRET SUBMISSION ---
 app.post("/submit", async (req, res) => {
   const submittedSecret = req.body.secret;
   try {
@@ -183,12 +203,12 @@ app.post("/submit", async (req, res) => {
     ]);
     res.redirect("/secrets");
   } catch (err) {
-    console.log(err);
+    console.log("Error submitting secret:", err);
     res.redirect("/secrets");
   }
 });
 
-// --- PASSPORT LOCAL STRATEGY ---
+// Passport Local Strategy
 passport.use(
   "local",
   new Strategy(async function verify(username, password, cb) {
@@ -196,7 +216,6 @@ passport.use(
       const result = await db.query("SELECT * FROM users WHERE email = $1", [username]);
       if (result.rows.length > 0) {
         const user = result.rows[0];
-        // Don't allow login for non-local users
         if (user.provider !== "local") {
           return cb(null, false);
         }
@@ -214,14 +233,16 @@ passport.use(
   })
 );
 
-// --- PASSPORT GOOGLE STRATEGY ---
+// Passport Google Strategy
 passport.use(
   "google",
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:3000/auth/google/secrets",
+      callbackURL: process.env.NODE_ENV === 'production' 
+        ? "https://secrets-app.onrender.com/auth/google/secrets"
+        : "http://localhost:3000/auth/google/secrets",
       userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
     },
     async (accessToken, refreshToken, profile, cb) => {
@@ -236,7 +257,7 @@ passport.use(
           );
           return cb(null, newUser.rows[0]);
         } else {
-          return cb(null, result.rows[0]);
+          return cb(null, result.rows);
         }
       } catch (err) {
         cb(err);
@@ -245,7 +266,6 @@ passport.use(
   )
 );
 
-// --- SERIALIZATION (STORE ONLY USER ID IN SESSION) ---
 passport.serializeUser((user, cb) => cb(null, user.id));
 passport.deserializeUser(async (id, cb) => {
   try {
@@ -260,15 +280,22 @@ passport.deserializeUser(async (id, cb) => {
   }
 });
 
-// --- GRACEFUL SHUTDOWN ---
 process.on('SIGINT', () => {
   db.end(() => {
-    console.log('Pool has ended');
+    console.log('Database pool ended');
     process.exit(0);
   });
 });
 
-// --- SERVER START ---
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+// Initialize database and start server
+console.log("Starting secrets application...");
+initializeDatabase()
+  .then(() => {
+    app.listen(port, () => {
+      console.log(`Server running on port ${port}`);
+    });
+  })
+  .catch(err => {
+    console.error("Failed to initialize database:", err);
+    process.exit(1);
+  });
