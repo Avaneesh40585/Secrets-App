@@ -1,5 +1,5 @@
 databases:
-  - name: community-db
+  - name: secrets-db
     databaseName: secrets_production
     user: secrets_user
     region: oregon
@@ -7,7 +7,7 @@ databases:
 
 services:
   - type: web
-    name: social-app
+    name: secrets-app
     runtime: node
     region: oregon
     plan: free
@@ -27,19 +27,19 @@ services:
       # Database connection
       - key: PG_HOST
         fromDatabase:
-          name: community-db
+          name: secrets-db
           property: host
       - key: PG_DATABASE
         fromDatabase:
-          name: community-db
+          name: secrets-db
           property: database
       - key: PG_USER
         fromDatabase:
-          name: community-db
+          name: secrets-db
           property: user
       - key: PG_PASSWORD
         fromDatabase:
-          name: community-db
+          name: secrets-db
           property: password
       - key: PG_PORT
         value: "5432"
