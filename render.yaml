@@ -1,5 +1,5 @@
 databases:
-  - name: secrets-db
+  - name: community-db
     databaseName: secrets_production
     user: secrets_user
     region: oregon
@@ -7,7 +7,7 @@ databases:
 
 services:
   - type: web
-    name: secrets-app
+    name: social-app
     runtime: node
     region: oregon
     plan: free
