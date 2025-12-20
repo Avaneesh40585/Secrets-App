@@ -257,7 +257,7 @@ passport.use(
           );
           return cb(null, newUser.rows[0]);
         } else {
-          return cb(null, result.rows);
+          return cb(null, result.rows[0]);
         }
       } catch (err) {
         cb(err);
