@@ -27,19 +27,19 @@ services:
       # Database connection
       - key: PG_HOST
         fromDatabase:
-          name: secrets-db
+          name: community-db
           property: host
       - key: PG_DATABASE
         fromDatabase:
-          name: secrets-db
+          name: community-db
           property: database
       - key: PG_USER
         fromDatabase:
-          name: secrets-db
+          name: community-db
           property: user
       - key: PG_PASSWORD
         fromDatabase:
-          name: secrets-db
+          name: community-db
           property: password
       - key: PG_PORT
         value: "5432"
