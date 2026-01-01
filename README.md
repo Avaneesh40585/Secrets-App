@@ -268,55 +268,49 @@ CREATE TABLE users (
 
 ## Contributing
 
-We welcome contributions! Here's how to get started:
+I welcome contributions! Here's how to get started:
 
-1. **Fork the repository**
+### 1. Fork and Clone the repository
+
+First, click the **Fork** button at the top right of this page to create a copy of this repository on your own GitHub account.
+
+Then, clone **your forked repository** to your local machine:
 
 ```bash
-git fork https://github.com/Avaneesh40585/secrets-app.git
+# Replace 'YOUR-USERNAME' with your actual GitHub username
+git clone [https://github.com/YOUR-USERNAME/Secrets-App.git](https://github.com/YOUR-USERNAME/Secrets-App.git)
+
+# Move into the project directory
+cd Secrets-App
 ```
 
-2. **Create a feature branch**
+### 2. Create a feature branch
 
 ```bash
 git checkout -b feature/amazing-feature
 ```
 
-3. **Make your changes**
+### 3. Make your changes
 
 - Follow existing code style and conventions
 - Add comments for complex logic
 - Test your changes thoroughly
 
-4. **Commit your changes**
+### 4. Commit your changes
 
 ```bash
 git commit -m "Add amazing feature: description of what it does"
 ```
 
-5. **Push to your fork**
+### 5. Push to your fork
 
 ```bash
 git push origin feature/amazing-feature
 ```
 
-6. **Open a Pull Request**
+### 6. Open a Pull Request
 
-- Provide a clear description of changes
-- Include screenshots if UI changes are involved
-- Reference any related issues
-
-### **Bug Reports**
-
-- Use GitHub Issues with the "bug" label
-- Include steps to reproduce, expected vs actual behavior
-- Provide environment details (OS, Node version, etc.)
-
-### **Feature Requests**
-
-- Use GitHub Issues with the "enhancement" label
-- Describe the use case and proposed solution
-- Consider backward compatibility
+Go to your forked repository on GitHub. You should see a prompt to create a Pull Request. Click **"Compare & pull request"** to submit your changes for review.
 
 ---
 
