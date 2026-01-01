@@ -273,7 +273,7 @@ We welcome contributions! Here's how to get started:
 1. **Fork the repository**
 
 ```bash
-git fork https://github.com/yourusername/secrets-app.git
+git fork https://github.com/Avaneesh40585/secrets-app.git
 ```
 
 2. **Create a feature branch**
