@@ -7,12 +7,11 @@ An anonymous social platform where users share secrets under rotating pseudonyms
 ## Table of Contents
 
 1. [Quick Start](#quick-start)
-2. [Environment Variables](#environment-variables)
-3. [Features](#features)
-4. [Tech Stack](#tech-stack)
-5. [Project Structure](#project-structure)
-6. [Database Schema](#database-schema)
-7. [API Reference](#api-reference)
+2. [Features](#features)
+3. [Tech Stack](#tech-stack)
+4. [Project Structure](#project-structure)
+5. [Database Schema](#database-schema)
+6. [API Reference](#api-reference)
 
 ---
 
@@ -31,7 +30,7 @@ An anonymous social platform where users share secrets under rotating pseudonyms
 git clone https://github.com/Avaneesh40585/Secrets-App.git
 cd Secrets-App
 npm install
-cp .env.example .env   # fill in your values
+cp .env.example .env   # fill in your values — see .env.example for all keys
 npm run dev            # development with auto-reload
 ```
 
@@ -39,31 +38,15 @@ Open [http://localhost:3000](http://localhost:3000).
 
 The schema runs automatically on first boot. No separate migration step is needed.
 
----
+### Demo data
 
-## Environment Variables
+To populate the database with sample users, posts, groups, reactions, and all other features:
 
-```env
-# PostgreSQL connection
-PG_USER=postgres
-PG_HOST=localhost
-PG_DATABASE=secrets
-PG_PASSWORD=your_db_password
-PG_PORT=5432
-
-# Session secret — use a long random string
-SESSION_SECRET=change_this_to_a_long_random_string
-
-# Google OAuth2 (optional — email/password login works without it)
-# Create credentials at https://console.cloud.google.com/apis/credentials
-# Add http://localhost:3000/auth/google/secrets as an authorised redirect URI
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-
-# Optional
-PORT=3000
-NODE_ENV=development
+```bash
+npm run seed
 ```
+
+This creates eight accounts, all with the password `password123`. Sign in as `demo@secrets.app` to see the app with a full feed, pending friend requests, notifications, bookmarks, and achievements pre-loaded. The seed is safe to run once — it exits early if the demo data already exists.
 
 ---
 
@@ -205,6 +188,7 @@ Secrets-App/
 ├── db/
 │   ├── index.js                 # pg connection pool, exported as `pool`
 │   ├── schema.sql               # All DDL, idempotent (CREATE TABLE IF NOT EXISTS)
+│   ├── seed.js                  # Demo data — 8 users, posts, groups, reactions, achievements
 │   ├── users.js                 # User lookup, creation, profile update
 │   ├── posts.js                 # Post CRUD, feed queries, hashtag extraction
 │   ├── friends.js               # Friend request, accept, decline, block queries
