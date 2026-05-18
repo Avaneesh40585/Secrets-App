@@ -7,11 +7,13 @@ An anonymous social platform where users share secrets under rotating pseudonyms
 ## Table of Contents
 
 1. [Quick Start](#quick-start)
-2. [Features](#features)
-3. [Tech Stack](#tech-stack)
-4. [Project Structure](#project-structure)
-5. [Database Schema](#database-schema)
-6. [API Reference](#api-reference)
+2. [Google OAuth Setup](#google-oauth-setup)
+3. [Deploying to Render](#deploying-to-render)
+4. [Features](#features)
+5. [Tech Stack](#tech-stack)
+6. [Project Structure](#project-structure)
+7. [Database Schema](#database-schema)
+8. [API Reference](#api-reference)
 
 ---
 
@@ -47,6 +49,79 @@ npm run seed
 ```
 
 This creates eight accounts, all with the password `password123`. Sign in as `demo@secrets.app` to see the app with a full feed, pending friend requests, notifications, bookmarks, and achievements pre-loaded. The seed is safe to run once — it exits early if the demo data already exists.
+
+---
+
+## Google OAuth Setup
+
+Google OAuth is optional — email/password login works without it. To enable it:
+
+**1. Create a Google Cloud project**
+
+1. Go to [https://console.cloud.google.com](https://console.cloud.google.com) and create a new project (or select an existing one).
+2. In the left menu go to **APIs & Services → OAuth consent screen**.
+3. Choose **External**, fill in the app name and your email, then save.
+
+**2. Create OAuth credentials**
+
+1. Go to **APIs & Services → Credentials → Create Credentials → OAuth client ID**.
+2. Set application type to **Web application**.
+3. Under **Authorised redirect URIs** add:
+   - `http://localhost:3000/auth/google/secrets` — for local development
+   - `https://your-app.onrender.com/auth/google/secrets` — for production (replace with your actual Render URL)
+4. Click **Create**. Copy the **Client ID** and **Client Secret**.
+
+**3. Add credentials to your environment**
+
+For local development, add to your `.env`:
+
+```env
+GOOGLE_CLIENT_ID=your_client_id_here
+GOOGLE_CLIENT_SECRET=your_client_secret_here
+```
+
+For production on Render, set these in the Render dashboard under **Environment** (see [Deploying to Render](#deploying-to-render)).
+
+> **Note:** After adding or changing a redirect URI in Google Cloud Console, wait up to 10 minutes for the change to propagate before testing.
+
+---
+
+## Deploying to Render
+
+The repository includes a `render.yaml` blueprint that provisions the database and web service in one step.
+
+**1. Push to GitHub**
+
+Make sure your code is pushed to a GitHub repository.
+
+**2. Create a new Render Blueprint**
+
+1. Log in to [https://render.com](https://render.com).
+2. Go to **New → Blueprint** and connect your GitHub repository.
+3. Render will detect `render.yaml` and provision:
+   - A **PostgreSQL** managed database (`secrets-db`)
+   - A **Node.js web service** (`secrets-app`)
+
+**3. Set secret environment variables**
+
+After the blueprint deploys, two variables require manual values because they cannot be committed to the repository. Go to **Dashboard → secrets-app → Environment** and add:
+
+| Key | Value |
+|---|---|
+| `GOOGLE_CLIENT_ID` | From your Google Cloud credentials |
+| `GOOGLE_CLIENT_SECRET` | From your Google Cloud credentials |
+
+Then click **Save Changes** — Render will redeploy automatically.
+
+**4. Confirm the OAuth callback URL**
+
+The `render.yaml` sets `GOOGLE_CALLBACK_URL` to `https://secrets-app-c07z.onrender.com/auth/google/secrets`. If your Render service URL is different, update this value in **Environment** to match your actual URL, and ensure the same URL is listed in your Google Cloud Console redirect URIs.
+
+**5. Seed the database**
+
+The build command (`npm ci && node db/seed.js`) runs the seed automatically on first deploy. Once the deploy completes, sign in with `demo@secrets.app` / `password123` to verify everything is working.
+
+**Subsequent deploys** happen automatically on every push to `main` (`autoDeploy: true`). The seed script detects existing data and skips silently.
 
 ---
 
