@@ -1,0 +1,174 @@
+<%- include('partials/header') %>
+
+<main class="main-container">
+  <div class="friends-page fade-in">
+    <div class="page-header">
+      <div>
+        <h2>Friends</h2>
+        <p>Connect with people you trust.</p>
+      </div>
+    </div>
+
+    <nav class="feed-tabs">
+      <a href="/friends?tab=friends" class="tab <%= tab === 'friends' ? 'active' : '' %>">
+        <span class="material-symbols-rounded size-20">group</span> Friends (<%= friends.length %>)
+      </a>
+      <a href="/friends?tab=incoming" class="tab <%= tab === 'incoming' ? 'active' : '' %>">
+        <span class="material-symbols-rounded size-20">notifications</span> Requests (<%= incoming.length %>)
+      </a>
+      <a href="/friends?tab=outgoing" class="tab <%= tab === 'outgoing' ? 'active' : '' %>">
+        <span class="material-symbols-rounded size-20">schedule_send</span> Sent (<%= outgoing.length %>)
+      </a>
+      <a href="/friends/search" class="tab <%= tab === 'search' ? 'active' : '' %>">
+        <span class="material-symbols-rounded size-20">search</span> Find
+      </a>
+    </nav>
+
+    <% if (tab === 'search') { %>
+      <form action="/friends/search" method="GET" class="search-bar">
+        <md-outlined-text-field
+          label="Search by name or email"
+          name="q"
+          value="<%= searchQuery %>"
+          autofocus
+          style="flex: 1;"></md-outlined-text-field>
+        <md-filled-button type="submit">Search</md-filled-button>
+      </form>
+
+      <% if (searchResults === null) { %>
+        <div class="feed-empty">
+          <span class="material-symbols-rounded">search</span>
+          <p>Type at least 2 characters to search.</p>
+        </div>
+      <% } else if (searchResults.length === 0) { %>
+        <div class="feed-empty">
+          <span class="material-symbols-rounded">person_off</span>
+          <p>No results for "<%= searchQuery %>"</p>
+        </div>
+      <% } else { %>
+        <% searchResults.forEach(function(u) { %>
+          <div class="friend-row">
+            <a href="/user/<%= u.id %>" style="text-decoration: none;">
+              <div class="avatar size-48" style="background: <%= u.avatarColors.c1 %>;"><%= u.initial %></div>
+            </a>
+            <div class="friend-info">
+              <a href="/user/<%= u.id %>" style="text-decoration: none; color: inherit;">
+                <div class="friend-name"><%= u.display_name || u.codename %></div>
+                <div class="friend-codename"><%= u.codename %></div>
+              </a>
+            </div>
+            <div class="actions">
+              <% if (u.relationship === 'none') { %>
+                <form action="/friends/request/<%= u.id %>" method="POST" style="margin:0;">
+                  <md-filled-tonal-button type="submit">
+                    <span class="material-symbols-rounded" slot="icon">person_add</span>
+                    Add
+                  </md-filled-tonal-button>
+                </form>
+              <% } else if (u.relationship === 'outgoing') { %>
+                <md-outlined-button disabled>Pending</md-outlined-button>
+              <% } else if (u.relationship === 'friends') { %>
+                <md-outlined-button disabled>
+                  <span class="material-symbols-rounded" slot="icon">check</span>
+                  Friends
+                </md-outlined-button>
+              <% } else if (u.relationship === 'incoming') { %>
+                <span style="font-size: 13px; color: var(--md-sys-color-on-surface-variant);">Sent you a request</span>
+              <% } %>
+            </div>
+          </div>
+        <% }); %>
+      <% } %>
+
+    <% } else if (tab === 'incoming') { %>
+
+      <% if (incoming.length === 0) { %>
+        <div class="feed-empty">
+          <span class="material-symbols-rounded">inbox</span>
+          <p>No pending requests.</p>
+        </div>
+      <% } else { %>
+        <% incoming.forEach(function(u) { %>
+          <div class="friend-row">
+            <div class="avatar size-48" style="background: <%= u.avatarColors.c1 %>;"><%= u.initial %></div>
+            <div class="friend-info">
+              <div class="friend-name"><%= u.display_name || u.codename %></div>
+              <div class="friend-codename"><%= u.codename %></div>
+            </div>
+            <div class="actions">
+              <form action="/friends/accept/<%= u.friendship_id %>" method="POST" style="margin:0;">
+                <md-filled-tonal-button type="submit">
+                  <span class="material-symbols-rounded" slot="icon">check</span>Accept
+                </md-filled-tonal-button>
+              </form>
+              <form action="/friends/decline/<%= u.friendship_id %>" method="POST" style="margin:0;">
+                <md-text-button type="submit">Decline</md-text-button>
+              </form>
+            </div>
+          </div>
+        <% }); %>
+      <% } %>
+
+    <% } else if (tab === 'outgoing') { %>
+
+      <% if (outgoing.length === 0) { %>
+        <div class="feed-empty">
+          <span class="material-symbols-rounded">outbox</span>
+          <p>No pending requests sent.</p>
+        </div>
+      <% } else { %>
+        <% outgoing.forEach(function(u) { %>
+          <div class="friend-row">
+            <div class="avatar size-48" style="background: <%= u.avatarColors.c1 %>;"><%= u.initial %></div>
+            <div class="friend-info">
+              <div class="friend-name"><%= u.display_name || u.codename %></div>
+              <div class="friend-codename"><%= u.codename %></div>
+            </div>
+            <div class="actions">
+              <form action="/friends/decline/<%= u.friendship_id %>" method="POST" style="margin:0;">
+                <md-text-button type="submit">Cancel</md-text-button>
+              </form>
+            </div>
+          </div>
+        <% }); %>
+      <% } %>
+
+    <% } else { %>
+
+      <% if (friends.length === 0) { %>
+        <div class="feed-empty">
+          <span class="material-symbols-rounded">group_off</span>
+          <p>You haven't added any friends yet.</p>
+          <md-filled-button href="/friends/search" style="margin-top: 16px;">
+            <span class="material-symbols-rounded" slot="icon">search</span>
+            Find friends
+          </md-filled-button>
+        </div>
+      <% } else { %>
+        <% friends.forEach(function(u) { %>
+          <div class="friend-row">
+            <a href="/user/<%= u.id %>" style="text-decoration: none;">
+              <div class="avatar size-48" style="background: <%= u.avatarColors.c1 %>;"><%= u.initial %></div>
+            </a>
+            <div class="friend-info">
+              <a href="/user/<%= u.id %>" style="text-decoration: none; color: inherit;">
+                <div class="friend-name"><%= u.display_name || u.codename %></div>
+                <div class="friend-codename"><%= u.codename %></div>
+              </a>
+            </div>
+            <div class="actions">
+              <form action="/friends/decline/<%= u.friendship_id %>" method="POST" style="margin:0;">
+                <md-icon-button type="submit" aria-label="Remove friend">
+                  <span class="material-symbols-rounded">person_remove</span>
+                </md-icon-button>
+              </form>
+            </div>
+          </div>
+        <% }); %>
+      <% } %>
+
+    <% } %>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

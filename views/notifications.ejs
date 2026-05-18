@@ -1,0 +1,34 @@
+<%- include('partials/header') %>
+
+<main class="main-container">
+  <div class="notifications-page fade-in">
+    <header class="page-header">
+      <div>
+        <h2>Notifications</h2>
+        <p>Stay caught up.</p>
+      </div>
+    </header>
+
+    <% if (!notifications || notifications.length === 0) { %>
+      <div class="feed-empty">
+        <span class="material-symbols-rounded">notifications_off</span>
+        <p>You're all caught up.</p>
+      </div>
+    <% } else { %>
+      <% notifications.forEach(function(n) { %>
+        <div class="notification-item <%= n.is_read ? '' : 'unread' %>" data-id="<%= n.id %>"
+             onclick="window.location.href='<%= n.type === 'friend_request' || n.type === 'friend_accept' ? '/friends' : (n.reference_id ? '/post/' + n.reference_id : '/feed') %>'">
+          <div class="notif-icon">
+            <span class="material-symbols-rounded"><%= n.icon %></span>
+          </div>
+          <div class="notif-body">
+            <p class="notif-message"><%= n.message %></p>
+            <div class="notif-time" data-timestamp="<%= n.created_at %>"><%= new Date(n.created_at).toLocaleString() %></div>
+          </div>
+        </div>
+      <% }); %>
+    <% } %>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

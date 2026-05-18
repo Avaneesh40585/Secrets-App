@@ -12,23 +12,30 @@ services:
     region: oregon
     plan: free
     branch: main
-    
+
     buildCommand: npm ci
     startCommand: npm start
     healthCheckPath: /
     autoDeploy: true
-    
+    pullRequestPreviewsEnabled: true
+
     envVars:
+      - key: NODE_VERSION
+        value: "20"
       - key: NODE_ENV
         value: production
       - key: PORT
         value: "10000"
-      
-      # Database connection
+
+      # Database connection — all properties sourced from the managed database
       - key: PG_HOST
         fromDatabase:
           name: secrets-db
           property: host
+      - key: PG_PORT
+        fromDatabase:
+          name: secrets-db
+          property: port
       - key: PG_DATABASE
         fromDatabase:
           name: secrets-db
@@ -41,14 +48,12 @@ services:
         fromDatabase:
           name: secrets-db
           property: password
-      - key: PG_PORT
-        value: "5432"
-      
-      # Session and authentication
+
+      # Session secret — generated once at first deploy, stable across restarts
       - key: SESSION_SECRET
         generateValue: true
-      
-      # Google OAuth (set manually in dashboard)
+
+      # Google OAuth — set manually in the Render dashboard after deploy
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET

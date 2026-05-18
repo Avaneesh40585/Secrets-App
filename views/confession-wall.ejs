@@ -1,0 +1,37 @@
+<%- include('partials/header') %>
+
+<main class="main-container">
+  <div class="wall-page fade-in">
+    <header style="margin-bottom: 16px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px;">
+      <div>
+        <h2 style="font-family: var(--md-sys-typescale-brand-font); font-weight: 600; font-size: 32px; margin: 0;">Confession Wall</h2>
+        <p style="color: var(--md-sys-color-on-surface-variant); margin: 4px 0 0;">Drag the notes to arrange them. Your layout is saved locally.</p>
+      </div>
+      <md-outlined-button id="resetLayoutBtn">
+        <span class="material-symbols-rounded" slot="icon">refresh</span>
+        Reset layout
+      </md-outlined-button>
+    </header>
+
+    <div class="wall-board" id="wallBoard">
+      <svg class="wall-chain-svg" id="wallChains"></svg>
+
+      <% posts.forEach(function(post, i) { %>
+        <div class="sticky-note cat-<%= post.category %>"
+             id="note-<%= post.id %>"
+             data-post-id="<%= post.id %>"
+             data-parent-id="<%= post.parent_post_id || '' %>"
+             draggable="true">
+          <div class="note-content"><%= post.content.length > 200 ? post.content.substring(0, 200) + '…' : post.content %></div>
+          <div class="note-meta">
+            <%= post.codename %> · <%= post.category %>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</main>
+
+<script src="/js/wall.js"></script>
+
+<%- include('partials/footer') %>

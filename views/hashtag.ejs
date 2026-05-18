@@ -1,0 +1,30 @@
+<%- include('partials/header') %>
+
+<main class="main-container">
+  <div class="hashtag-page fade-in">
+    <div class="hashtag-header">
+      <h2>#<%= tag %></h2>
+      <p style="color: var(--md-sys-color-on-surface-variant); font-size: 14px; margin: 4px 0 0;">
+        Posts tagged with <strong>#<%= tag %></strong>
+      </p>
+    </div>
+
+    <% if (!posts || posts.length === 0) { %>
+      <div class="feed-empty">
+        <span class="material-symbols-rounded">tag</span>
+        <h4>No posts with #<%= tag %> yet</h4>
+        <p>Be the first to use this hashtag.</p>
+        <md-filled-button href="/submit" style="margin-top: 16px;">
+          <span class="material-symbols-rounded" slot="icon">edit</span>
+          Share a secret
+        </md-filled-button>
+      </div>
+    <% } else { %>
+      <% posts.forEach(function(post) { %>
+        <%- include('partials/post-card', { post: post, user: user }) %>
+      <% }); %>
+    <% } %>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

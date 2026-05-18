@@ -1,0 +1,58 @@
+<%- include('partials/header') %>
+
+<main class="main-container">
+  <div class="content-container wide fade-in">
+    <header class="page-header">
+      <div>
+        <h2>Groups</h2>
+        <p>Circles where secrets are shared with a tighter community.</p>
+      </div>
+      <md-filled-button href="/groups/create">
+        <span class="material-symbols-rounded" slot="icon">add</span>
+        Create group
+      </md-filled-button>
+    </header>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="message error">
+        <span class="material-symbols-rounded">error</span><span><%= error %></span>
+      </div>
+    <% } %>
+
+    <% if (!groups || groups.length === 0) { %>
+      <div class="feed-empty">
+        <span class="material-symbols-rounded">groups</span>
+        <h4>No groups yet</h4>
+        <p>Be the first to start a circle.</p>
+      </div>
+    <% } else { %>
+      <div class="groups-grid">
+        <% groups.forEach(function(g) { %>
+          <a href="/groups/<%= g.id %>" class="group-card">
+            <div class="group-icon">
+              <span class="material-symbols-rounded size-32"><%= g.is_private ? 'lock' : 'groups' %></span>
+            </div>
+            <h5 class="group-name"><%= g.name %></h5>
+            <% if (g.description) { %>
+              <p class="group-desc"><%= g.description %></p>
+            <% } %>
+            <div class="group-meta">
+              <span>
+                <span class="material-symbols-rounded size-20">group</span>
+                <%= g.member_count %> member<%= g.member_count == 1 ? '' : 's' %>
+              </span>
+              <% if (g.is_member) { %>
+                <span style="color: var(--md-sys-color-primary);">
+                  <span class="material-symbols-rounded size-20">check_circle</span>
+                  Joined
+                </span>
+              <% } %>
+            </div>
+          </a>
+        <% }); %>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

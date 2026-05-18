@@ -1,0 +1,96 @@
+<article class="post-card fade-in <%= post.is_whisper ? 'whisper' : '' %>" data-post-id="<%= post.id %>"
+  <% if (post.is_whisper) { %>style="--whisper-opacity: <%= Math.max(0.3, (post.whisper_views_remaining || 0) / 10) %>;"<% } %>>
+
+  <header class="post-card__header">
+    <a href="/user/<%= post.user_id %>" style="text-decoration: none;">
+      <div class="avatar size-40" style="background: <%= post.avatar_c1 %>;">
+        <%= post.initial %>
+      </div>
+    </a>
+    <div class="post-card__author">
+      <a href="/user/<%= post.user_id %>" class="post-card__codename" style="text-decoration: none; color: inherit;">
+        <%= post.codename %>
+      </a>
+      <div class="post-card__meta">
+        <span data-timestamp="<%= post.created_at %>"><%= new Date(post.created_at).toLocaleString() %></span>
+        <% if (post.is_whisper) { %>
+          • <span class="whisper-badge">
+              <span class="material-symbols-rounded">timer</span>
+              <%= post.whisper_views_remaining %> left
+            </span>
+        <% } %>
+      </div>
+    </div>
+
+    <% if (typeof user !== 'undefined' && user) { %>
+      <div class="post-card__menu">
+        <md-icon-button class="bookmark-btn" data-post-id="<%= post.id %>"
+                        data-active="<%= post.bookmarked ? 'true' : 'false' %>" aria-label="Bookmark">
+          <span class="material-symbols-rounded"><%= post.bookmarked ? 'bookmark' : 'bookmark_border' %></span>
+        </md-icon-button>
+        <% if (user.id === post.user_id) { %>
+          <md-icon-button class="delete-post-btn" data-post-id="<%= post.id %>" aria-label="Delete">
+            <span class="material-symbols-rounded">delete</span>
+          </md-icon-button>
+        <% } else { %>
+          <md-icon-button class="report-post-btn" data-post-id="<%= post.id %>" aria-label="Report">
+            <span class="material-symbols-rounded">flag</span>
+          </md-icon-button>
+        <% } %>
+      </div>
+    <% } %>
+  </header>
+
+  <% if (post.category && post.category !== 'general') { %>
+    <span class="post-card__category">
+      <span class="material-symbols-rounded size-20">label</span>
+      <%= post.category %>
+    </span>
+  <% } %>
+
+  <p class="post-card__content"><%- (post.content || '')
+    .replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))
+    .replace(/#([a-zA-Z0-9_]{1,40})/g, '<a href="/hashtag/$1" class="hashtag">#$1</a>') %></p>
+
+  <footer class="post-card__actions">
+    <button class="reaction-btn <%= post.user_reaction ? 'active' : '' %>"
+            data-post-id="<%= post.id %>"
+            data-type="<%= post.user_reaction || 'like' %>">
+      <span class="material-symbols-rounded">thumb_up</span>
+      <span class="count"><%= post.reaction_count || 0 %></span>
+    </button>
+
+    <button class="reaction-btn comment-toggle" data-post-id="<%= post.id %>">
+      <span class="material-symbols-rounded">mode_comment</span>
+      <span class="count"><%= post.comment_count || 0 %></span>
+    </button>
+
+    <a href="/submit?reply=<%= post.id %>" class="reaction-btn" style="text-decoration: none;">
+      <span class="material-symbols-rounded">reply</span>
+      Reply
+    </a>
+
+    <% if (post.reply_count > 0 || post.parent_post_id) { %>
+      <a href="/post/<%= post.parent_post_id || post.id %>" class="post-card__chain-link reaction-btn" style="text-decoration: none;">
+        <span class="material-symbols-rounded">forum</span>
+        Thread <% if (post.reply_count > 0) { %>(<%= post.reply_count %>)<% } %>
+      </a>
+    <% } %>
+
+  </footer>
+
+  <div class="comments-section hidden" id="comments-<%= post.id %>" data-post-id="<%= post.id %>">
+    <form class="comment-form" data-post-id="<%= post.id %>">
+      <md-outlined-text-field
+        placeholder="Add a comment…"
+        rows="1"
+        type="textarea"
+        maxlength="500"
+        class="comment-input"></md-outlined-text-field>
+      <md-icon-button type="submit" aria-label="Send">
+        <span class="material-symbols-rounded">send</span>
+      </md-icon-button>
+    </form>
+    <div class="comment-list"></div>
+  </div>
+</article>

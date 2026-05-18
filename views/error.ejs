@@ -1,0 +1,19 @@
+<%- include('partials/header') %>
+
+<main class="main-container">
+  <div class="hero fade-in" style="padding: 64px 20px;">
+    <img class="hero-logo" src="/assets/icons/favicon.png" alt="Secrets logo" style="border-radius: 20px;">
+    <h1 class="hero-title" style="color: var(--md-sys-color-on-surface);">
+      <%= code %>
+    </h1>
+    <p class="hero-subtitle"><%= message %></p>
+    <div class="hero-actions">
+      <md-filled-button href="/">
+        <span class="material-symbols-rounded" slot="icon">home</span>
+        Back home
+      </md-filled-button>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

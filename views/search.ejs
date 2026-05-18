@@ -1,0 +1,84 @@
+<%- include('partials/header') %>
+
+<main class="main-container">
+  <div class="search-page fade-in">
+    <div class="page-header">
+      <div>
+        <h2>Search</h2>
+        <% if (searchQuery) { %>
+          <p>Results for &ldquo;<strong><%= searchQuery %></strong>&rdquo;</p>
+        <% } else { %>
+          <p>Find secrets, people, and hashtags</p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Mobile search (the top bar search is hidden <768px) -->
+    <form action="/search" method="GET" class="search-bar" style="margin-bottom: 20px;">
+      <md-outlined-text-field
+        name="q"
+        label="Search"
+        value="<%= searchQuery %>"
+        style="flex: 1;"
+        type="search">
+        <span class="material-symbols-rounded" slot="leading-icon">search</span>
+      </md-outlined-text-field>
+      <md-filled-button type="submit">Go</md-filled-button>
+    </form>
+
+    <% if (searchQuery) { %>
+
+      <!-- Hashtag results -->
+      <% if (tagResults && tagResults.length > 0) { %>
+      <div class="search-results-section">
+        <h3><span class="material-symbols-rounded size-16">tag</span> Hashtags</h3>
+        <div class="category-chips">
+          <% tagResults.forEach(function(t) { %>
+            <a href="/hashtag/<%= encodeURIComponent(t.tag) %>" class="category-chip">
+              #<%= t.tag %> <span style="opacity: .6; font-size: 12px;">(<%= t.count %>)</span>
+            </a>
+          <% }) %>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- People results -->
+      <% if (userResults && userResults.length > 0) { %>
+      <div class="search-results-section">
+        <h3><span class="material-symbols-rounded size-16">person</span> People</h3>
+        <% userResults.forEach(function(u) { %>
+          <a href="/user/<%= u.id %>" class="friend-row" style="text-decoration: none;">
+            <div class="avatar size-40" style="background: <%= u.avatar_c1 %>;"><%= u.initial %></div>
+            <div class="friend-info">
+              <div class="friend-name"><%= u.codename %></div>
+              <% if (u.displayName) { %><div class="friend-codename"><%= u.displayName %></div><% } %>
+            </div>
+            <span class="material-symbols-rounded" style="color: var(--md-sys-color-on-surface-variant);">chevron_right</span>
+          </a>
+        <% }) %>
+      </div>
+      <% } %>
+
+      <!-- Post results -->
+      <% if (postResults && postResults.length > 0) { %>
+      <div class="search-results-section">
+        <h3><span class="material-symbols-rounded size-16">article</span> Posts</h3>
+        <% postResults.forEach(function(post) { %>
+          <%- include('partials/post-card', { post: post, user: user }) %>
+        <% }); %>
+      </div>
+      <% } %>
+
+      <% if ((!tagResults || tagResults.length === 0) && (!userResults || userResults.length === 0) && (!postResults || postResults.length === 0)) { %>
+        <div class="search-empty">
+          <span class="material-symbols-rounded" style="font-size: 48px; opacity: .4; display: block; margin-bottom: 12px;">search_off</span>
+          <p>No results for &ldquo;<%= searchQuery %>&rdquo;</p>
+          <p style="font-size: 13px; opacity: .7;">Try different keywords or browse the feed.</p>
+        </div>
+      <% } %>
+
+    <% } %>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

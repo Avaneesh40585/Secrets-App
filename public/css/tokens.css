@@ -1,0 +1,240 @@
+/* ============================================================
+   Design Tokens — Google design language
+   Modeled on Google Tasks / Google Calendar / Google Drive
+   ============================================================ */
+
+:root {
+  color-scheme: light;
+
+  /* ── Core color ── */
+  --google-blue:        #1A73E8;
+  --google-blue-dark:   #1557B0;
+  --google-blue-light:  #D2E3FC;
+  --google-blue-hover:  #E8F0FE;
+
+  --google-red:         #D93025;
+  --google-green:       #137333;
+  --google-yellow:      #F9AB00;
+
+  /* ── System colors (light) ── */
+  --md-sys-color-primary:                  #1A73E8;
+  --md-sys-color-on-primary:               #FFFFFF;
+  --md-sys-color-primary-container:        #D2E3FC;
+  --md-sys-color-on-primary-container:     #174EA6;
+
+  --md-sys-color-secondary:                #5F6368;
+  --md-sys-color-on-secondary:             #FFFFFF;
+  --md-sys-color-secondary-container:      #E8EAED;
+  --md-sys-color-on-secondary-container:   #202124;
+
+  --md-sys-color-tertiary:                 #188038;
+  --md-sys-color-on-tertiary:              #FFFFFF;
+  --md-sys-color-tertiary-container:       #CEEAD6;
+  --md-sys-color-on-tertiary-container:    #0D652D;
+
+  --md-sys-color-error:                    #D93025;
+  --md-sys-color-on-error:                 #FFFFFF;
+  --md-sys-color-error-container:          #FCE8E6;
+  --md-sys-color-on-error-container:       #C5221F;
+
+  --md-sys-color-background:               #FFFFFF;
+  --md-sys-color-on-background:            #202124;
+
+  --md-sys-color-surface:                  #FFFFFF;
+  --md-sys-color-on-surface:               #202124;
+  --md-sys-color-on-surface-variant:       #5F6368;
+  --md-sys-color-surface-variant:          #F1F3F4;
+
+  --md-sys-color-surface-dim:              #E8EAED;
+  --md-sys-color-surface-bright:           #FFFFFF;
+
+  --md-sys-color-surface-container-lowest: #FFFFFF;
+  --md-sys-color-surface-container-low:    #F8F9FA;
+  --md-sys-color-surface-container:        #F1F3F4;
+  --md-sys-color-surface-container-high:   #E8EAED;
+  --md-sys-color-surface-container-highest:#E2E5E9;
+
+  --md-sys-color-outline:                  #DADCE0;
+  --md-sys-color-outline-variant:          #E8EAED;
+
+  /* md-switch: pin OFF thumb color explicitly so it works in both themes */
+  --md-switch-handle-color:                #606368;
+  --md-switch-track-outline-color:         #DADCE0;
+
+  --md-sys-color-inverse-surface:          #303134;
+  --md-sys-color-inverse-on-surface:       #E8EAED;
+  --md-sys-color-inverse-primary:          #8AB4F8;
+
+  --md-sys-color-surface-tint:             #1A73E8;
+
+  /* ── Shape ── */
+  --md-sys-shape-corner-none:              0px;
+  --md-sys-shape-corner-extra-small:       4px;
+  --md-sys-shape-corner-small:             8px;
+  --md-sys-shape-corner-medium:            12px;
+  --md-sys-shape-corner-large:             16px;
+  --md-sys-shape-corner-extra-large:       20px;
+  --md-sys-shape-corner-full:              9999px;
+
+  /* ── Typography ── */
+  /* Reference tokens: cascade to every @material/web component internally */
+  --md-ref-typeface-brand:          'Google Sans', system-ui, sans-serif;
+  --md-ref-typeface-plain:          'Google Sans', system-ui, sans-serif;
+
+  /* Custom shorthand tokens used by our own CSS */
+  --md-sys-typescale-brand-font:    'Google Sans', 'Google Sans Display', system-ui, sans-serif;
+  --md-sys-typescale-plain-font:    'Google Sans', system-ui, sans-serif;
+
+  --md-sys-typescale-display-size:    36px;
+  --md-sys-typescale-headline-size:   24px;
+  --md-sys-typescale-title-size:      20px;
+  --md-sys-typescale-body-size:       14px;
+  --md-sys-typescale-label-size:      12px;
+
+  /* ── Elevation — hairline borders + minimal shadow ── */
+  --md-sys-elevation-0:  none;
+  --md-sys-elevation-1:  0 1px 2px rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
+  --md-sys-elevation-2:  0 1px 2px rgba(60,64,67,.3), 0 2px 6px 2px rgba(60,64,67,.15);
+  --md-sys-elevation-3:  0 4px 8px 3px rgba(60,64,67,.15), 0 1px 3px rgba(60,64,67,.3);
+  --md-sys-elevation-4:  0 6px 10px 4px rgba(60,64,67,.15), 0 2px 3px rgba(60,64,67,.3);
+
+  /* ── Motion ── */
+  --md-sys-motion-easing-standard:   cubic-bezier(0.2, 0, 0, 1);
+  --md-sys-motion-duration-short:    200ms;
+  --md-sys-motion-duration-medium:   300ms;
+
+  /* ── Material Web Component overrides ── */
+  --md-sys-color-shadow: rgba(60,64,67,.3);
+
+  /* ── Button shape + font ── */
+  --md-filled-button-container-shape:        20px;
+  --md-outlined-button-container-shape:      20px;
+  --md-text-button-container-shape:          20px;
+  --md-tonal-button-container-shape:         20px;
+  --md-filled-button-container-height:       36px;
+  --md-outlined-button-container-height:     36px;
+  --md-text-button-container-height:         36px;
+
+  --md-filled-button-label-text-font:        'Google Sans', system-ui;
+  --md-filled-button-label-text-size:        14px;
+  --md-filled-button-label-text-weight:      500;
+  --md-outlined-button-label-text-font:      'Google Sans', system-ui;
+  --md-outlined-button-label-text-size:      14px;
+  --md-outlined-button-label-text-weight:    500;
+  --md-text-button-label-text-font:          'Google Sans', system-ui;
+  --md-text-button-label-text-size:          14px;
+  --md-text-button-label-text-weight:        500;
+  --md-tonal-button-label-text-font:         'Google Sans', system-ui;
+  --md-tonal-button-label-text-size:         14px;
+  --md-tonal-button-label-text-weight:       500;
+
+  /* ── Text field font + shape ── */
+  --md-outlined-text-field-label-text-font:  'Google Sans', system-ui;
+  --md-outlined-text-field-label-text-size:  14px;
+  --md-outlined-text-field-input-text-font:  'Google Sans', system-ui;
+  --md-outlined-text-field-input-text-size:  14px;
+  --md-outlined-text-field-supporting-text-font: 'Google Sans', system-ui;
+  --md-outlined-text-field-supporting-text-size: 12px;
+  --md-outlined-text-field-container-shape:  4px;
+
+  --md-filled-text-field-label-text-font:    'Google Sans', system-ui;
+  --md-filled-text-field-label-text-size:    14px;
+  --md-filled-text-field-input-text-font:    'Google Sans', system-ui;
+  --md-filled-text-field-input-text-size:    14px;
+  --md-filled-text-field-supporting-text-font: 'Google Sans', system-ui;
+  --md-filled-text-field-supporting-text-size: 12px;
+  --md-filled-text-field-container-shape-start-start: 4px;
+  --md-filled-text-field-container-shape-start-end:   4px;
+
+  /* Dialog */
+  --md-dialog-container-shape: 8px;
+
+  /* Icon button */
+  --md-icon-button-container-shape: 50%;
+
+  /* FAB */
+  --md-fab-container-shape:        16px;
+  --md-fab-large-container-shape:  28px;
+
+  /* Symbols */
+  --md-symbols-fill:   0;
+  --md-symbols-weight: 400;
+  --md-symbols-grade:  0;
+  --md-symbols-opsz:   24;
+}
+
+/* ── Dark theme ── */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --md-sys-color-primary:                  #8AB4F8;
+  --md-sys-color-on-primary:               #062E6F;
+  --md-sys-color-primary-container:        #0842A0;
+  --md-sys-color-on-primary-container:     #D2E3FC;
+
+  --md-sys-color-secondary:                #9AA0A6;
+  --md-sys-color-on-secondary:             #303134;
+  --md-sys-color-secondary-container:      #3C4043;
+  --md-sys-color-on-secondary-container:   #E8EAED;
+
+  --md-sys-color-error:                    #F28B82;
+  --md-sys-color-on-error:                 #601410;
+  --md-sys-color-error-container:          #8C1D18;
+  --md-sys-color-on-error-container:       #F9DEDC;
+
+  --md-sys-color-background:               #202124;
+  --md-sys-color-on-background:            #E8EAED;
+
+  --md-sys-color-surface:                  #202124;
+  --md-sys-color-on-surface:               #E8EAED;
+  --md-sys-color-on-surface-variant:       #9AA0A6;
+  --md-sys-color-surface-variant:          #303134;
+
+  --md-sys-color-surface-container-lowest: #1A1B1E;
+  --md-sys-color-surface-container-low:    #202124;
+  --md-sys-color-surface-container:        #2D2E30;
+  --md-sys-color-surface-container-high:   #303134;
+  --md-sys-color-surface-container-highest:#3C4043;
+
+  --md-sys-color-outline:                  #3C4043;
+  --md-sys-color-outline-variant:          #303134;
+
+  /* md-switch: override handle so the OFF thumb is visible in dark mode */
+  --md-switch-handle-color:                #9AA0A6;
+  --md-switch-track-outline-color:         #9AA0A6;
+
+  --md-sys-color-inverse-surface:          #E8EAED;
+  --md-sys-color-inverse-on-surface:       #303134;
+  --md-sys-color-inverse-primary:          #1A73E8;
+
+  --md-sys-elevation-1: 0 1px 2px rgba(0,0,0,.4), 0 1px 3px 1px rgba(0,0,0,.25);
+  --md-sys-elevation-2: 0 1px 2px rgba(0,0,0,.4), 0 2px 6px 2px rgba(0,0,0,.25);
+  --md-sys-elevation-3: 0 4px 8px 3px rgba(0,0,0,.25), 0 1px 3px rgba(0,0,0,.4);
+}
+
+/* Theme transition — fires ONLY during the 250ms window when theme is swapping */
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition:
+    background-color var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard),
+    border-color     var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard),
+    color            var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard) !important;
+}
+
+/* Interactive element transitions (always-on — intentional hover/focus feedback) */
+.post-card, .group-card, .notification-item, .reaction-btn, .chip, .badge,
+.nav-rail-item .icon-pill, .bottom-nav-item .icon-pill, .friend-row,
+.snackbar, .fab-fixed {
+  transition:
+    background-color 150ms var(--md-sys-motion-easing-standard),
+    border-color     150ms var(--md-sys-motion-easing-standard),
+    box-shadow       150ms var(--md-sys-motion-easing-standard),
+    transform        150ms var(--md-sys-motion-easing-standard),
+    opacity          150ms var(--md-sys-motion-easing-standard);
+}
+
+/* Respect reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}

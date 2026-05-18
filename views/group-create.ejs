@@ -1,0 +1,50 @@
+<%- include('partials/header') %>
+
+<main class="main-container">
+  <div class="submit-page fade-in">
+    <h2>Create a group</h2>
+    <p>Build a small circle where confessions stay between members.</p>
+
+    <form action="/groups/create" method="POST">
+      <div class="form-section">
+        <md-outlined-text-field
+          label="Group name"
+          name="name"
+          required
+          maxlength="100"
+          style="width: 100%;"></md-outlined-text-field>
+      </div>
+
+      <div class="form-section">
+        <md-outlined-text-field
+          label="Description"
+          name="description"
+          type="textarea"
+          rows="3"
+          maxlength="500"
+          supporting-text="What is this group about?"
+          style="width: 100%;"></md-outlined-text-field>
+      </div>
+
+      <div class="form-section">
+        <div class="whisper-toggle">
+          <div class="toggle-label">
+            <strong>Private group</strong>
+            <span>Hidden from browse — members can only join via invite</span>
+          </div>
+          <md-switch id="privateSwitch" name="is_private" value="true"></md-switch>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <md-text-button href="/groups" type="button">Cancel</md-text-button>
+        <md-filled-button type="submit">
+          <span class="material-symbols-rounded" slot="icon">add</span>
+          Create
+        </md-filled-button>
+      </div>
+    </form>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

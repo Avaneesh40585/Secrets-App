@@ -1,0 +1,74 @@
+<%- include('partials/header') %>
+
+<main class="main-container">
+  <div class="feed-page">
+    <header class="feed-header fade-in">
+      <h2>
+        <% if (feedType === 'trending') { %>Trending
+        <% } else if (feedType === 'friends') { %>Friends
+        <% } else { %>Your feed<% } %>
+      </h2>
+      <p>
+        <% if (feedType === 'trending') { %>What everyone's talking about right now.
+        <% } else if (feedType === 'friends') { %>Secrets from the people you care about.
+        <% } else { %>The latest secrets shared anonymously.<% } %>
+      </p>
+    </header>
+
+    <nav class="feed-tabs" aria-label="Feed filter">
+      <a href="/feed" class="tab <%= feedType === 'all' ? 'active' : '' %>">
+        <span class="material-symbols-rounded size-20">home</span>All
+      </a>
+      <a href="/feed/trending" class="tab <%= feedType === 'trending' ? 'active' : '' %>">
+        <span class="material-symbols-rounded size-20">local_fire_department</span>Trending
+      </a>
+      <a href="/feed/friends" class="tab <%= feedType === 'friends' ? 'active' : '' %>">
+        <span class="material-symbols-rounded size-20">group</span>Friends
+      </a>
+    </nav>
+
+    <% if (feedType === 'all') { %>
+    <div class="category-chips" role="group" aria-label="Filter by category">
+      <%
+        const cats = [
+          { key: 'all', label: 'All', icon: 'apps' },
+          { key: 'confession', label: 'Confession', icon: 'lock' },
+          { key: 'question', label: 'Question', icon: 'help' },
+          { key: 'story', label: 'Story', icon: 'auto_stories' },
+          { key: 'advice', label: 'Advice', icon: 'lightbulb' },
+          { key: 'vent', label: 'Vent', icon: 'mood_bad' },
+          { key: 'joy', label: 'Joy', icon: 'sentiment_very_satisfied' },
+        ];
+      %>
+      <% cats.forEach(function(c) { %>
+        <a href="<%= c.key === 'all' ? '/feed' : '/feed?category=' + c.key %>"
+           class="category-chip <%= activeCategory === c.key ? 'active' : '' %>">
+          <span class="material-symbols-rounded" style="font-size: 14px;"><%= c.icon %></span>
+          <%= c.label %>
+        </a>
+      <% }) %>
+    </div>
+    <% } %>
+
+    <% if (!posts || posts.length === 0) { %>
+      <div class="feed-empty">
+        <span class="material-symbols-rounded">forum</span>
+        <h4>Nothing here yet</h4>
+        <p>
+          <% if (feedType === 'friends') { %>Add some friends to see their secrets here.
+          <% } else { %>Be the first to share a secret.<% } %>
+        </p>
+        <md-filled-button href="/submit" style="margin-top: 16px;">
+          <span class="material-symbols-rounded" slot="icon">add</span>
+          Share a secret
+        </md-filled-button>
+      </div>
+    <% } else { %>
+      <% posts.forEach(function(post) { %>
+        <%- include('partials/post-card', { post: post, user: user }) %>
+      <% }); %>
+    <% } %>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

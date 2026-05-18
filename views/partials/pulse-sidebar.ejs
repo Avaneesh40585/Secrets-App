@@ -1,0 +1,144 @@
+<% if (typeof pulse !== 'undefined' && pulse) { %>
+<aside class="pulse-sidebar" id="pulseSidebar" aria-label="Pulse — discover">
+
+  <!-- Mobile close button -->
+  <div class="pulse-close-row">
+    <span class="pulse-close-title">Pulse</span>
+    <md-icon-button class="pulse-close-btn" aria-label="Close panel">
+      <span class="material-symbols-rounded">close</span>
+    </md-icon-button>
+  </div>
+
+  <!-- Today's prompt -->
+  <section class="pulse-card">
+    <h3 class="pulse-card__title">
+      <span class="material-symbols-rounded">auto_awesome</span>
+      Today's prompt
+    </h3>
+    <p class="pulse-card__prompt">&ldquo;<%= pulse.prompt %>&rdquo;</p>
+    <md-text-button href="/submit?prompt=<%= encodeURIComponent(pulse.prompt) %>">
+      Share yours
+      <span class="material-symbols-rounded" slot="icon">edit</span>
+    </md-text-button>
+  </section>
+
+  <!-- Your day -->
+  <section class="pulse-card">
+    <h3 class="pulse-card__title">
+      <span class="material-symbols-rounded">bar_chart</span>
+      Your day
+    </h3>
+    <div class="pulse-day-stats">
+      <div class="pulse-day-stat">
+        <span class="pulse-day-num"><%= pulse.dayStats.posts %></span>
+        <span class="pulse-day-label">Posts</span>
+      </div>
+      <div class="pulse-day-stat">
+        <span class="pulse-day-num"><%= pulse.dayStats.reactions %></span>
+        <span class="pulse-day-label">Reactions</span>
+      </div>
+      <div class="pulse-day-stat">
+        <span class="pulse-day-num"><%= pulse.dayStats.comments %></span>
+        <span class="pulse-day-label">Comments</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- On this day -->
+  <% if (pulse.onThisDay) { %>
+  <section class="pulse-card">
+    <h3 class="pulse-card__title">
+      <span class="material-symbols-rounded">history</span>
+      On this day
+    </h3>
+    <p class="pulse-card__hint">
+      <%= pulse.onThisDay.years_ago %> year<%= pulse.onThisDay.years_ago === 1 ? '' : 's' %> ago,
+      <a href="/user/<%= pulse.onThisDay.user_id %>"><%= pulse.onThisDay.codename %></a> shared:
+    </p>
+    <a href="/post/<%= pulse.onThisDay.id %>" class="pulse-throwback">
+      <%= (pulse.onThisDay.content || '').slice(0, 140) %><%= pulse.onThisDay.content.length > 140 ? '…' : '' %>
+    </a>
+  </section>
+  <% } %>
+
+  <!-- Online friends -->
+  <% if (pulse.onlineFriends && pulse.onlineFriends.length > 0) { %>
+  <section class="pulse-card">
+    <h3 class="pulse-card__title">
+      <span class="material-symbols-rounded">radio_button_checked</span>
+      Online now
+    </h3>
+    <div class="pulse-online">
+      <% pulse.onlineFriends.forEach(function(u) { %>
+        <a href="/user/<%= u.id %>" class="pulse-online-avatar" title="<%= u.codename %>">
+          <div class="avatar size-32" style="background: <%= u.avatar_c1 %>;"><%= u.initial %></div>
+          <span class="pulse-online-dot"></span>
+        </a>
+      <% }) %>
+    </div>
+  </section>
+  <% } %>
+
+  <!-- Trending hashtags -->
+  <% if (pulse.hashtags && pulse.hashtags.length > 0) { %>
+  <section class="pulse-card">
+    <h3 class="pulse-card__title">
+      <span class="material-symbols-rounded">trending_up</span>
+      Trending
+    </h3>
+    <ul class="pulse-tags">
+      <% pulse.hashtags.forEach(function(t) { %>
+        <li>
+          <a href="/hashtag/<%= encodeURIComponent(t.tag) %>">#<%= t.tag %></a>
+          <span class="tag-count"><%= t.count %></span>
+        </li>
+      <% }) %>
+    </ul>
+  </section>
+  <% } %>
+
+  <!-- Who to follow -->
+  <% if (pulse.suggestions && pulse.suggestions.length > 0) { %>
+  <section class="pulse-card">
+    <h3 class="pulse-card__title">
+      <span class="material-symbols-rounded">person_add</span>
+      Suggested
+    </h3>
+    <% pulse.suggestions.forEach(function(u) { %>
+      <div class="pulse-user">
+        <div class="avatar size-32" style="background: <%= u.avatar_c1 %>;"><%= u.initial %></div>
+        <a href="/user/<%= u.id %>"><%= u.codename %></a>
+        <form action="/friends/request/<%= u.id %>" method="POST" style="line-height:0;">
+          <md-icon-button type="submit" aria-label="Add friend">
+            <span class="material-symbols-rounded">person_add</span>
+          </md-icon-button>
+        </form>
+      </div>
+    <% }) %>
+  </section>
+  <% } %>
+
+  <!-- Friend activity -->
+  <% if (pulse.activity && pulse.activity.length > 0) { %>
+  <section class="pulse-card">
+    <h3 class="pulse-card__title">
+      <span class="material-symbols-rounded">bolt</span>
+      Activity
+    </h3>
+    <ul class="pulse-activity">
+      <% pulse.activity.forEach(function(a) { %>
+        <li>
+          <span class="material-symbols-rounded"><%= a.icon %></span>
+          <span><a href="<%= a.href %>"><%= a.codename %></a> <%= a.verb %></span>
+        </li>
+      <% }) %>
+    </ul>
+  </section>
+  <% } %>
+
+
+</aside>
+
+<!-- Mobile backdrop -->
+<div class="pulse-backdrop" id="pulseBackdrop"></div>
+<% } %>

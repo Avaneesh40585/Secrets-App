@@ -1,317 +1,374 @@
-# Secrets App 🗝️
+# Secrets
 
-An anonymous secret-sharing app I built with Node.js, Express, Passport.js, PostgreSQL, and EJS. It handles local and Google OAuth login, lets users submit secrets anonymously, and displays them in a rotating carousel. Uses bcrypt for password hashing, connection pooling for the database, and Material Design-inspired UI.
+An anonymous social platform where users share secrets under rotating pseudonyms. Built with Node.js, Express, PostgreSQL, and EJS. The interface follows Google's Material Design 3 system, matching the aesthetic of Google Tasks, Google Calendar, and Google Drive.
+
+---
 
 ## Table of Contents
 
-- [Features](#features)
-- [Visual Demo](#visual-demo)
-- [Folder Structure](#folder-structure)
-- [How It Works](#how-it-works)
-- [Dependencies](#dependencies)
-- [Installation & Usage](#installation--usage)
-- [Database Configuration](#database-configuration)
-- [API Endpoints](#api-endpoints)
-- [Customization & Extensions](#customization--extensions)
-- [Contributing](#contributing)
+1. [Quick Start](#quick-start)
+2. [Environment Variables](#environment-variables)
+3. [Features](#features)
+4. [Tech Stack](#tech-stack)
+5. [Project Structure](#project-structure)
+6. [Database Schema](#database-schema)
+7. [API Reference](#api-reference)
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+| Requirement | Minimum version |
+|---|---|
+| Node.js | 18 |
+| PostgreSQL | 12 |
+
+### Install and run
+
+```bash
+git clone https://github.com/Avaneesh40585/Secrets-App.git
+cd Secrets-App
+npm install
+cp .env.example .env   # fill in your values
+npm run dev            # development with auto-reload
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+The schema runs automatically on first boot. No separate migration step is needed.
+
+---
+
+## Environment Variables
+
+```env
+# PostgreSQL connection
+PG_USER=postgres
+PG_HOST=localhost
+PG_DATABASE=secrets
+PG_PASSWORD=your_db_password
+PG_PORT=5432
+
+# Session secret — use a long random string
+SESSION_SECRET=change_this_to_a_long_random_string
+
+# Google OAuth2 (optional — email/password login works without it)
+# Create credentials at https://console.cloud.google.com/apis/credentials
+# Add http://localhost:3000/auth/google/secrets as an authorised redirect URI
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+# Optional
+PORT=3000
+NODE_ENV=development
+```
 
 ---
 
 ## Features
 
-- **Authentication:** Email/password and Google OAuth2
-- **Anonymous sharing:** Submit and update secrets without exposing identity
-- **Secrets feed:** Carousel showing all submitted secrets
-- **Security:** Hashed passwords, sessions, and SQL injection-safe queries
-- **UI:** Responsive, Material Design-style layout
-- **Performance:** PostgreSQL connection pooling and efficient session usage
-- **Validation:** Server-side input checks with error messages
-- **Responsive:** Works on desktop and mobile
+### Identity
+
+Every user is assigned a **weekly rotating codename** — a deterministic `Adjective Noun` pair generated from their user ID and the current ISO week number. 200 adjectives and 200 nouns combine for 40,000 possible codenames. Codenames rotate simultaneously for all users at the start of each ISO week.
+
+Avatars are a single flat colour chosen deterministically from a 12-colour Google palette. No uploads required.
+
+Users can optionally add a display name and bio. Anonymity is the default.
+
+### Layout
+
+On screens 1024px and wider the app renders a three-column layout:
+
+| Column | Content |
+|---|---|
+| Left (80px) | Navigation rail |
+| Centre (flexible) | Page content, capped at 720px and centred |
+| Right (340–420px) | Pulse discovery sidebar |
+
+On phones and tablets, the navigation rail is replaced by a bottom navigation bar and the Pulse panel is accessible as a slide-in drawer via the sparkle icon in the top app bar.
+
+### Navigation rail
+
+Seven destinations on desktop, shown as icon + label:
+
+| Icon | Label | Route |
+|---|---|---|
+| `home` | Feed | `/feed` |
+| `group` | Friends | `/friends` |
+| `groups` | Groups | `/groups` |
+| `notifications` | Alerts | `/notifications` |
+| `bookmark` | Saved | `/bookmarks` |
+| `dashboard` | Wall | `/confession-wall` |
+| `account_circle` | Profile | `/profile` |
+
+### Feed
+
+| Tab | Description |
+|---|---|
+| All | Chronological feed of all public posts |
+| Trending | Ranked by reactions using Hacker News–style time decay: `reactions / (hours + 2)^1.5` |
+| Friends | Posts from accepted friends only |
+
+Category filter chips at the top of the All tab narrow the feed by: General, Confession, Question, Story, Advice, Vent, Joy.
+
+### Posts
+
+- Unlimited posts per user — each is a separate entry in the feed
+- **Whisper mode** — a post that fades in opacity as views are consumed, disappearing permanently after 10 views
+- **Reply chains** — reply to any post; thread view shows the chain with indented cards
+- **Hashtags** — typing `#word` in a post body automatically creates a tag. Tags are clickable links that open a filtered feed. Trending hashtags appear in the Pulse sidebar on desktop.
+- **Category** — each post is tagged at creation: General, Confession, Question, Story, Advice, Vent, or Joy
+
+### Bookmarks
+
+Any post can be bookmarked using the bookmark icon in the post card header. Saved posts are accessible at `/bookmarks`.
+
+### Search
+
+A search bar in the top app bar opens `/search`, which returns matching posts, users, and hashtags simultaneously.
+
+### Social
+
+- Friend requests with pending, accepted, and declined states
+- User search by display name or email
+- Public user profiles showing post history, stats, and earned badges
+- **Groups** — public or private circles with group-scoped feeds
+- **Block** — block any user to remove their posts from your feed
+- **Report** — flag a post for review
+
+### Engagement
+
+- Reactions via AJAX — no page reload
+- Anonymous comments per post via AJAX
+- Notifications for reactions, comments, friend requests, and group events. Badge count in the navigation rail updates in real time and clears on visit.
+
+### Pulse Sidebar
+
+On screens 1024px and wider, a persistent right-hand panel shows the following widgets in order:
+
+| Widget | Description |
+|---|---|
+| **Today's prompt** | A daily writing prompt with a one-click link to the composer |
+| **Your day** | Your post, reaction, and comment counts for the past 24 hours |
+| **On this day** | A post from this calendar day in a previous year, from you or a friend (shown only when a match exists) |
+| **Online now** | Friends seen in the last 5 minutes |
+| **Trending** | Top hashtags from the past 7 days |
+| **Suggested** | Users you are not yet friends with |
+| **Activity** | Recent posts and reactions from friends |
+
+On phones and tablets, the Pulse panel is accessible via the sparkle button (`auto_awesome`) in the top app bar. It slides in as a drawer from the right edge. Tap the backdrop or the close button to dismiss.
+
+### Draft persistence
+
+The post composer automatically saves a draft to `localStorage` as you type. Returning to the form restores the draft. Submitting clears it.
+
+### Confession Wall
+
+A full-screen drag-and-drop board where any post becomes a sticky note. Notes retain their position on refresh via `localStorage`. SVG lines connect reply chains visually. Accessible from the Wall item in the navigation rail.
+
+### Achievements
+
+Badges awarded automatically based on activity: First Whisper, Night Owl, Storyteller, Heart of Gold, Social Butterfly, Community Builder, and others. Visible on your profile.
+
+### Theme
+
+Light and dark modes, toggled via the button in the top app bar. The preference persists to `localStorage`. The system's `prefers-color-scheme` is respected on the first visit. A sync script in `<head>` prevents any flash before the page renders. Colour transitions animate only during the theme swap, not on every interaction.
 
 ---
 
-## Visual Demo
+## Tech Stack
 
-![Secrets-App Demo](https://github.com/user-attachments/assets/9ce2006c-67e5-4112-bc3e-410a51f6fbd9)
+| Layer | Technology |
+|---|---|
+| Server | Node.js + Express 4 |
+| Templates | EJS |
+| Auth | Passport.js — local strategy + Google OAuth2 |
+| Database | PostgreSQL with `pg` connection pool |
+| Passwords | bcrypt, 10 salt rounds |
+| Sessions | express-session |
+| UI components | @material/web v2 via CDN (no build step) |
+| Icons | Material Symbols Rounded via Google Fonts |
+| Typography | Google Sans + Google Sans Display |
 
 ---
 
-## Folder Structure
+## Project Structure
 
 ```
-secrets-app/
-├── index.js               # Main server file with routes & auth
-├── package.json           # Dependencies & scripts
-├── .env                   # Environment variables (gitignored)
+Secrets-App/
+├── index.js                     # Bootstrap — middleware, router mounts, graceful shutdown
+├── package.json
+├── render.yaml                  # Render deployment configuration
+│
+├── db/
+│   ├── index.js                 # pg connection pool, exported as `pool`
+│   ├── schema.sql               # All DDL, idempotent (CREATE TABLE IF NOT EXISTS)
+│   ├── users.js                 # User lookup, creation, profile update
+│   ├── posts.js                 # Post CRUD, feed queries, hashtag extraction
+│   ├── friends.js               # Friend request, accept, decline, block queries
+│   ├── groups.js                # Group creation, membership, feed queries
+│   ├── reactions.js             # Reaction toggle and bulk lookup
+│   ├── comments.js              # Comment creation and list
+│   ├── bookmarks.js             # Bookmark toggle and list
+│   ├── notifications.js         # Notification creation, list, mark-read
+│   ├── reports.js               # Post report creation
+│   ├── achievements.js          # Achievement check and award
+│   ├── pulse.js                 # Pulse sidebar queries: trending hashtags, suggestions,
+│   │                            #   friend activity, day stats, online friends, on this day
+│   ├── codenames.js             # Weekly rotating codename + deterministic avatar colour
+│   └── prompts.js               # Daily writing prompt (deterministic by date)
+│
+├── routes/
+│   ├── pages.js                 # GET /  (landing page, redirects if authenticated)
+│   ├── auth.js                  # GET/POST /login  /register  /logout  /auth/google
+│   ├── feed.js                  # GET /feed  /feed/trending  /feed/friends
+│   ├── posts.js                 # GET /submit  POST /post/create  GET /post/:id
+│   ├── profile.js               # GET/POST /profile  /profile/edit  GET /user/:id
+│   ├── friends.js               # GET /friends  /friends/search
+│   │                            # POST /friends/request|accept|decline|block|unblock
+│   ├── groups.js                # GET/POST /groups  /groups/create
+│   │                            # GET /groups/:id  POST /groups/:id/join|leave
+│   ├── bookmarks.js             # GET /bookmarks
+│   ├── search.js                # GET /search
+│   ├── hashtag.js               # GET /hashtag/:tag
+│   ├── notifications.js         # GET /notifications
+│   ├── wall.js                  # GET /confession-wall
+│   └── api.js                   # POST /api/post/:id/react|comment|bookmark|report|delete
+│                                # GET  /api/post/:id/comments
+│
+├── middleware/
+│   └── auth.js                  # ensureAuthenticated · attachUnreadCount · attachPulse
+│
 ├── views/
-│   ├── home.ejs           # Landing page
-│   ├── login.ejs          # Login form
-│   ├── register.ejs       # Registration form
-│   ├── secrets.ejs        # Rotating secrets carousel
-│   ├── submit.ejs         # Secret submission form
-│   └── partials/
-│       ├── header.ejs     # Navigation header
-│       └── footer.ejs     # Footer with attribution
+│   ├── partials/
+│   │   ├── header.ejs           # HTML head, theme sync script, Material Web import, top app bar
+│   │   ├── footer.ejs           # Closes app-shell div, pulse sidebar include, scripts, snackbar
+│   │   ├── nav.ejs              # Desktop navigation rail (Feed, Friends, Groups, Alerts,
+│   │   │                        #   Saved, Wall, Profile)
+│   │   ├── bottom-nav.ejs       # Mobile bottom navigation bar (Feed, Friends, Post, Alerts, Saved)
+│   │   ├── post-card.ejs        # Reusable post card with reactions, comments, bookmark, report
+│   │   └── pulse-sidebar.ejs    # Pulse panel (desktop static column + mobile slide-in drawer)
+│   │
+│   ├── home.ejs                 # Landing page for unauthenticated visitors
+│   ├── login.ejs                # Sign in (email/password + Google OAuth)
+│   ├── register.ejs             # Create account (email/password + Google OAuth)
+│   ├── error.ejs                # Generic error page
+│   ├── feed.ejs                 # Main feed with All / Trending / Friends tabs and category chips
+│   ├── submit.ejs               # Post composer — category, whisper toggle, draft persistence
+│   ├── post-view.ejs            # Single post with indented reply chain
+│   ├── bookmarks.ejs            # Saved posts
+│   ├── search.ejs               # Search results across posts, users, and hashtags
+│   ├── hashtag.ejs              # Posts filtered by a single hashtag
+│   ├── profile.ejs              # User profile — stats, badges, post history
+│   ├── profile-edit.ejs         # Edit display name and bio
+│   ├── friends.ejs              # Friends list, incoming/outgoing requests, user search
+│   ├── groups.ejs               # Group directory
+│   ├── group-create.ejs         # Create group form
+│   ├── group-detail.ejs         # Group feed and member list
+│   ├── notifications.ejs        # Notification list (marked read on visit)
+│   └── confession-wall.ejs      # Full-screen drag-and-drop sticky-note board
+│
 └── public/
-    └── css/
-        └── styles.css     # Material Design-inspired styling
+    ├── assets/
+    │   └── icons/
+    │       └── favicon.png      # App icon — used as logo in top bar and auth pages
+    ├── css/
+    │   ├── styles.css           # Entry point — @import all partials in cascade order
+    │   ├── tokens.css           # MD3 colour, shape, typography, elevation, motion tokens
+    │   │                        #   for both light and dark themes
+    │   ├── base.css             # Box-sizing reset, body, headings, links, Material Symbols,
+    │   │                        #   scrollbar, fade-in animation
+    │   ├── layouts.css          # Flex-row app-shell (3-column desktop, single-column mobile),
+    │   │                        #   top app bar, search bar, navigation rail, bottom nav,
+    │   │                        #   auth container, hero section
+    │   ├── components.css       # Post card, avatar, badges, reaction buttons, comment form,
+    │   │                        #   pulse sidebar (desktop column + mobile drawer), snackbar,
+    │   │                        #   message banners
+    │   └── pages.css            # Feed, submit, profile, friends, groups, notifications,
+    │                            #   bookmarks, search, hashtag, wall — plus responsive
+    │                            #   breakpoints (480 / 600 / 768 / 1024 / 1440px)
+    └── js/
+        ├── app.js               # Reactions, comments, bookmarks, delete, report,
+        │                        #   pulse drawer open/close, timestamp formatting
+        ├── theme.js             # Light/dark toggle — reads localStorage, syncs icon,
+        │                        #   gates colour transition to the 250ms swap window
+        └── wall.js              # Confession wall drag-and-drop, SVG chain lines,
+                                 #   position persistence via localStorage
 ```
 
 ---
 
-## How It Works
+## Database Schema
 
-### 1. **Authentication Flow**
+| Table | Purpose |
+|---|---|
+| `users` | Accounts — email, hashed password, display name, bio, avatar seed, last seen timestamp |
+| `posts` | All posts — content, category, whisper state, view count, parent post for chains, group association |
+| `post_hashtags` | Extracted hashtag index for fast tag queries |
+| `friendships` | Relationships — pending, accepted, or blocked |
+| `groups` | Named circles with public/private flag |
+| `group_members` | Group membership with member/admin roles |
+| `reactions` | One reaction per user per post |
+| `comments` | Anonymous comments on posts |
+| `bookmarks` | Saved posts per user |
+| `notifications` | Per-user event log (reaction, comment, friend request, group) |
+| `reports` | Flagged posts — stored for review |
+| `achievements` | Achievement catalogue (key, name, description, icon) |
+| `user_achievements` | Earned achievements per user with timestamp |
 
-- Users can register with email/password or sign in with Google OAuth2
-- Passwords are hashed using bcrypt with salt rounds
-- Sessions store only user ID for security and efficiency
-- Passport.js handles authentication strategies
-
-### 2. **Secret Management**
-
-- Users must be authenticated to view or submit secrets
-- Each user can have one secret that can be updated
-- Secrets are stored anonymously in PostgreSQL
-- Submit form shows user's current secret for easy editing
-
-### 3. **Community Carousel**
-
-- Displays all submitted secrets in random order
-- Auto-rotates every 5 seconds with smooth transitions
-- Manual navigation with previous/next buttons
-- Keyboard navigation support (arrow keys)
-- Mobile-responsive controls
-
-### 4. **Security & Performance**
-
-- Connection pooling with `pg.Pool` for database efficiency
-- Parameterized queries prevent SQL injection
-- Session management with secure cookies
-- Input validation and error handling
-- Graceful shutdown with proper cleanup
+All tables use `CREATE TABLE IF NOT EXISTS`. Column additions to `users` run via idempotent `DO` blocks. The schema file can be run multiple times without side effects.
 
 ---
 
-## Dependencies
-
-**Core Dependencies:**
-
-- `express` - Web framework
-- `ejs` - Templating engine
-- `pg` - PostgreSQL client with connection pooling
-- `bcrypt` - Password hashing
-- `passport` - Authentication middleware
-- `passport-local` - Local authentication strategy
-- `passport-google-oauth2` - Google OAuth2 strategy
-- `express-session` - Session management
-- `cookie-parser` - Cookie parsing middleware
-- `dotenv` - Environment variable management
-
-**Development:**
-
-- `nodemon` - Development server with auto-restart
-
----
-
-## Installation & Usage
-
-### Prerequisites
-
-- Node.js v16 or higher
-- PostgreSQL v12 or higher
-- Google OAuth2 credentials (for Google sign-in)
-- npm or yarn package manager
-
-### Setup Instructions
-
-1. **Clone the repository**
-
-```bash
-git clone https://github.com/Avaneesh40585/Secrets-App.git
-cd Secrets-App
-```
-
-2. **Install dependencies**
-
-```bash
-npm install
-```
-
-3. **Environment configuration**
-
-- Required environment variables:
-  | Variable | Description | Example |
-  |----------|-------------|---------|
-  | `PG_USER` | PostgreSQL username | `postgres` |
-  | `PG_HOST` | Database host | `localhost` |
-  | `PG_DATABASE` | Database name | `secrets` |
-  | `PG_PASSWORD` | Database password | `mypassword` |
-  | `PG_PORT` | PostgreSQL port | `5432` |
-  | `GOOGLE_CLIENT_ID` | OAuth2 client ID | `your-client-id.googleusercontent.com` |
-  | `GOOGLE_CLIENT_SECRET` | OAuth2 client secret | `your-client-secret` |
-  | `SESSION_SECRET` | Session encryption key | `very-long-random-string` |
-  | `PORT` | Application port | `3000` |
-
-- Create a `.env` file in the root directory:
-
-```env
-PG_USER=your_database_user
-PG_HOST=localhost
-PG_DATABASE=secrets
-PG_PASSWORD=your_database_password
-PG_PORT=5432
-
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-
-SESSION_SECRET=your_very_long_random_session_secret
-PORT=3000
-```
-
-4. **Database setup**
-
-```bash
-# Create the Database first if not created already
-createdb -U postgres todo-list
-# Then connect to PostgreSQL and run the queries.sql file
-psql -U postgres -d todo-list -f queries.sql
-```
-
-5. **Google OAuth Setup**
-
-- Go to [Google Cloud Console](https://console.cloud.google.com/)
-- Create a new project or select existing
-- Enable Google+ API
-- Create OAuth2 credentials
-- Add `http://localhost:3000/auth/google/secrets` as authorized redirect URI
-
-6. **Start the application**
-
-```bash
-nodemon index.js
-```
-
-7. **Access the app**
-
-Open `http://localhost:3000` in your browser
-
----
-
-## Database Configuration
-
-The application uses a single PostgreSQL table:
-
-```sql
-CREATE TABLE users (
-  id SERIAL PRIMARY KEY,
-  email VARCHAR(100) NOT NULL UNIQUE,
-  password VARCHAR(255),                 -- NULL for OAuth users
-  secret TEXT,                           -- User's submitted secret
-  provider VARCHAR(32) DEFAULT 'local'   -- 'local' or 'google'
-);
-```
-
-**Key Features:**
-
-- Auto-incrementing ID as primary key
-- Unique email constraint
-- Flexible password field (NULL for OAuth users)
-- Provider field to distinguish authentication methods
-- Text field for secrets with no length limit
-
----
-
-## API Endpoints
-
-### Public Routes
-
-| Method | Endpoint    | Description                                 |
-| ------ | ----------- | ------------------------------------------- |
-| `GET`  | `/`         | Home page with registration/login options   |
-| `GET`  | `/login`    | Login form                                  |
-| `GET`  | `/register` | Registration form                           |
-| `POST` | `/login`    | Authenticate user (redirects to `/secrets`) |
-| `POST` | `/register` | Create new user account                     |
-
-### OAuth Routes
-
-| Method | Endpoint               | Description                 |
-| ------ | ---------------------- | --------------------------- |
-| `GET`  | `/auth/google`         | Initiate Google OAuth2 flow |
-| `GET`  | `/auth/google/secrets` | OAuth2 callback URL         |
-
-### Protected Routes (Authentication Required)
-
-| Method | Endpoint   | Description                                   |
-| ------ | ---------- | --------------------------------------------- |
-| `GET`  | `/secrets` | View rotating carousel of all secrets         |
-| `GET`  | `/submit`  | Secret submission form (shows current secret) |
-| `POST` | `/submit`  | Create or update user's secret                |
-| `GET`  | `/logout`  | Logout and destroy session                    |
-
----
-
-## Customization & Extensions
-
-- Add **email verification** during signup to confirm user accounts.
-- Implement **password reset** via email tokens for account recovery.
-- Introduce **categories and filters** so users can browse secrets by topic.
-- Add a **like/reaction system** to let users interact with secrets anonymously.
-- Build an **admin dashboard** for moderating flagged or inappropriate content.
-- Apply **rate limiting** to prevent spam and abuse.
-- Include a **dark mode toggle** for better user experience.
-- Add **export functionality** so users can download their own secrets.
-- Implement a **notification system** to alert users
-
----
-
-## Contributing
-
-I welcome contributions! Here's how to get started:
-
-### 1. Fork and Clone the repository
-
-First, click the **Fork** button at the top right of this page to create a copy of this repository on your own GitHub account.
-
-Then, clone **your forked repository** to your local machine:
-
-```bash
-# Replace 'YOUR-USERNAME' with your actual GitHub username
-git clone [https://github.com/YOUR-USERNAME/Secrets-App.git](https://github.com/YOUR-USERNAME/Secrets-App.git)
-
-# Move into the project directory
-cd Secrets-App
-```
-
-### 2. Create a feature branch
-
-```bash
-git checkout -b feature/amazing-feature
-```
-
-### 3. Make your changes
-
-- Follow existing code style and conventions
-- Add comments for complex logic
-- Test your changes thoroughly
-
-### 4. Commit your changes
-
-```bash
-git commit -m "Add amazing feature: description of what it does"
-```
-
-### 5. Push to your fork
-
-```bash
-git push origin feature/amazing-feature
-```
-
-### 6. Open a Pull Request
-
-Go to your forked repository on GitHub. You should see a prompt to create a Pull Request. Click **"Compare & pull request"** to submit your changes for review.
-
----
-
-**Start sharing secrets anonymously today!**
+## API Reference
+
+### Page routes
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/` | Landing page (redirects to `/feed` if authenticated) |
+| GET/POST | `/login` | Sign in with email and password or Google OAuth |
+| GET/POST | `/register` | Create a new account |
+| GET | `/logout` | End session |
+| GET | `/auth/google` | Start Google OAuth flow |
+| GET | `/feed` | Main feed. Optional `?category=` filter. |
+| GET | `/feed/trending` | Trending posts |
+| GET | `/feed/friends` | Posts from friends |
+| GET | `/submit` | Post composer. Optional `?reply=:id` and `?prompt=:text`. |
+| POST | `/post/create` | Submit a post |
+| GET | `/post/:id` | Single post with reply chain |
+| GET | `/bookmarks` | Saved posts |
+| GET | `/search` | Search posts, users, and hashtags via `?q=` |
+| GET | `/hashtag/:tag` | All posts with a given hashtag |
+| GET | `/profile` | Your profile |
+| GET/POST | `/profile/edit` | Edit display name and bio |
+| GET | `/user/:id` | Another user's public profile |
+| GET | `/friends` | Friends list and pending requests |
+| GET | `/friends/search` | Search users by name or email |
+| POST | `/friends/request/:userId` | Send a friend request |
+| POST | `/friends/accept/:friendshipId` | Accept a request |
+| POST | `/friends/decline/:friendshipId` | Decline or cancel a request |
+| POST | `/friends/block/:userId` | Block a user |
+| POST | `/friends/unblock/:userId` | Unblock a user |
+| GET | `/groups` | Browse groups |
+| GET/POST | `/groups/create` | Create a group |
+| GET | `/groups/:id` | Group feed and members |
+| POST | `/groups/:id/join` | Join a group |
+| POST | `/groups/:id/leave` | Leave a group |
+| GET | `/notifications` | Notification list (marks all read on visit) |
+| GET | `/confession-wall` | Drag-and-drop sticky-note board |
+
+### JSON endpoints
+
+All JSON endpoints require authentication and accept/return `application/json`.
+
+| Method | Path | Request body | Response |
+|---|---|---|---|
+| POST | `/api/post/:id/react` | `{ type: "like" }` | `{ active, type, count }` |
+| GET | `/api/post/:id/comments` | — | `{ comments: [...] }` |
+| POST | `/api/post/:id/comment` | `{ content }` | `{ comment: {...} }` |
+| POST | `/api/post/:id/bookmark` | — | `{ bookmarked: boolean }` |
+| POST | `/api/post/:id/report` | `{ reason }` | `{ ok: true }` |
+| POST | `/api/post/:id/delete` | — | `{ ok: boolean }` |

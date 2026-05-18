@@ -1,0 +1,33 @@
+<nav class="bottom-nav" aria-label="Primary navigation">
+  <a href="/feed" class="bottom-nav-item <%= activePage === 'feed' ? 'active' : '' %>">
+    <span class="icon-pill"><span class="material-symbols-rounded">home</span></span>
+    <span class="nav-label">Feed</span>
+  </a>
+
+  <a href="/friends" class="bottom-nav-item <%= activePage === 'friends' ? 'active' : '' %>">
+    <span class="icon-pill"><span class="material-symbols-rounded">group</span></span>
+    <span class="nav-label">Friends</span>
+  </a>
+
+  <a href="/submit" class="bottom-nav-item">
+    <span class="icon-pill" style="background: var(--md-sys-color-primary); width: 56px;">
+      <span class="material-symbols-rounded" style="color: var(--md-sys-color-on-primary); font-variation-settings: 'FILL' 1, 'wght' 600;">add</span>
+    </span>
+    <span class="nav-label">Post</span>
+  </a>
+
+  <a href="/notifications" class="bottom-nav-item <%= activePage === 'notifications' ? 'active' : '' %>">
+    <span class="icon-pill">
+      <span class="material-symbols-rounded">notifications</span>
+      <% if (unreadCount > 0) { %>
+        <span class="nav-badge"><%= unreadCount > 99 ? '99+' : unreadCount %></span>
+      <% } %>
+    </span>
+    <span class="nav-label">Alerts</span>
+  </a>
+
+  <a href="/bookmarks" class="bottom-nav-item <%= activePage === 'bookmarks' ? 'active' : '' %>">
+    <span class="icon-pill"><span class="material-symbols-rounded">bookmark</span></span>
+    <span class="nav-label">Saved</span>
+  </a>
+</nav>

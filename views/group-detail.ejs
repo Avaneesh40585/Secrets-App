@@ -1,0 +1,71 @@
+<%- include('partials/header') %>
+
+<main class="main-container">
+  <div class="content-container wide fade-in">
+
+    <section class="profile-hero" style="margin-bottom: 16px;">
+      <div class="group-icon" style="width: 96px; height: 96px; border-radius: 16px; display: grid; place-items: center; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);">
+        <span class="material-symbols-rounded size-48"><%= group.is_private ? 'lock' : 'groups' %></span>
+      </div>
+      <div class="profile-info">
+        <h2><%= group.name %></h2>
+        <% if (group.description) { %>
+          <p class="bio"><%= group.description %></p>
+        <% } %>
+        <div class="profile-actions">
+          <span style="color: var(--md-sys-color-on-primary-container); font-size: 14px;">
+            <%= group.member_count %> member<%= group.member_count == 1 ? '' : 's' %>
+          </span>
+          <% if (!group.is_member) { %>
+            <form action="/groups/<%= group.id %>/join" method="POST" style="display: inline;">
+              <md-filled-tonal-button type="submit">
+                <span class="material-symbols-rounded" slot="icon">add</span>Join
+              </md-filled-tonal-button>
+            </form>
+          <% } else if (group.creator_id !== user.id) { %>
+            <form action="/groups/<%= group.id %>/leave" method="POST" style="display: inline;">
+              <md-text-button type="submit">Leave</md-text-button>
+            </form>
+          <% } %>
+        </div>
+      </div>
+    </section>
+
+    <div style="display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 24px;">
+      <div style="display: grid; grid-template-columns: minmax(0, 1fr); gap: 0;">
+        <section class="profile-section">
+          <h3>Posts</h3>
+          <% if (!posts || posts.length === 0) { %>
+            <div class="feed-empty">
+              <span class="material-symbols-rounded">post_add</span>
+              <p>No secrets shared in this group yet.</p>
+            </div>
+          <% } else { %>
+            <% posts.forEach(function(post) { %>
+              <%- include('partials/post-card', { post: post, user: user }) %>
+            <% }); %>
+          <% } %>
+        </section>
+      </div>
+    </div>
+
+    <section class="profile-section">
+      <h3>Members</h3>
+      <div class="groups-grid" style="grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));">
+        <% members.forEach(function(m) { %>
+          <a href="/user/<%= m.id %>" class="friend-row" style="text-decoration: none; color: inherit;">
+            <div class="avatar size-40" style="background: <%= m.avatarColors.c1 %>;">
+              <%= m.initial %>
+            </div>
+            <div class="friend-info">
+              <div class="friend-name"><%= m.display_name || m.codename %></div>
+              <div class="friend-codename"><%= m.role %></div>
+            </div>
+          </a>
+        <% }); %>
+      </div>
+    </section>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

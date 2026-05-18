@@ -1,0 +1,42 @@
+<%- include('partials/header') %>
+
+<main class="main-container">
+  <div class="submit-page fade-in">
+    <h2>Edit profile</h2>
+    <p>Customize how others see you. Your real identity stays hidden.</p>
+
+    <form action="/profile/edit" method="POST">
+      <div class="form-section">
+        <md-outlined-text-field
+          label="Display name (optional)"
+          name="display_name"
+          maxlength="50"
+          value="<%= profileUser.display_name || '' %>"
+          supporting-text="Shown on your profile. Leave blank to stay fully anonymous."
+          style="width: 100%;"></md-outlined-text-field>
+      </div>
+
+      <div class="form-section">
+        <md-outlined-text-field
+          label="Bio"
+          name="bio"
+          type="textarea"
+          rows="4"
+          maxlength="280"
+          value="<%= profileUser.bio || '' %>"
+          supporting-text="Up to 280 characters."
+          style="width: 100%;"></md-outlined-text-field>
+      </div>
+
+      <div class="form-actions">
+        <md-text-button href="/profile" type="button">Cancel</md-text-button>
+        <md-filled-button type="submit">
+          <span class="material-symbols-rounded" slot="icon">save</span>
+          Save changes
+        </md-filled-button>
+      </div>
+    </form>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

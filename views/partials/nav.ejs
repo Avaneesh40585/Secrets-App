@@ -1,0 +1,53 @@
+<nav class="nav-rail" aria-label="Primary navigation">
+  <a href="/feed" class="nav-rail-item <%= activePage === 'feed' || activePage === 'trending' ? 'active' : '' %>">
+    <span class="icon-pill">
+      <span class="material-symbols-rounded">home</span>
+    </span>
+    <span class="nav-label">Feed</span>
+  </a>
+
+  <a href="/friends" class="nav-rail-item <%= activePage === 'friends' ? 'active' : '' %>">
+    <span class="icon-pill">
+      <span class="material-symbols-rounded">group</span>
+    </span>
+    <span class="nav-label">Friends</span>
+  </a>
+
+  <a href="/groups" class="nav-rail-item <%= activePage === 'groups' ? 'active' : '' %>">
+    <span class="icon-pill">
+      <span class="material-symbols-rounded">groups</span>
+    </span>
+    <span class="nav-label">Groups</span>
+  </a>
+
+  <a href="/notifications" class="nav-rail-item <%= activePage === 'notifications' ? 'active' : '' %>">
+    <span class="icon-pill">
+      <span class="material-symbols-rounded">notifications</span>
+      <% if (unreadCount > 0) { %>
+        <span class="nav-badge"><%= unreadCount > 99 ? '99+' : unreadCount %></span>
+      <% } %>
+    </span>
+    <span class="nav-label">Alerts</span>
+  </a>
+
+  <a href="/bookmarks" class="nav-rail-item <%= activePage === 'bookmarks' ? 'active' : '' %>">
+    <span class="icon-pill">
+      <span class="material-symbols-rounded">bookmark</span>
+    </span>
+    <span class="nav-label">Saved</span>
+  </a>
+
+  <a href="/confession-wall" class="nav-rail-item <%= activePage === 'wall' ? 'active' : '' %>">
+    <span class="icon-pill">
+      <span class="material-symbols-rounded">dashboard</span>
+    </span>
+    <span class="nav-label">Wall</span>
+  </a>
+
+  <a href="/profile" class="nav-rail-item <%= activePage === 'profile' ? 'active' : '' %>">
+    <span class="icon-pill">
+      <span class="material-symbols-rounded">account_circle</span>
+    </span>
+    <span class="nav-label">Profile</span>
+  </a>
+</nav>

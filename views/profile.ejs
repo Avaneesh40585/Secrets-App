@@ -1,0 +1,96 @@
+<%- include('partials/header') %>
+
+<main class="main-container">
+  <div class="profile-page fade-in">
+
+    <section class="profile-hero">
+      <div class="avatar size-128" style="background: <%= avatarColors.c1 %>;">
+        <%= initial %>
+      </div>
+      <div class="profile-info">
+        <h2><%= profileUser.display_name || codename %></h2>
+        <span class="codename">
+          <span class="material-symbols-rounded sz-20">mask</span>
+          <%= codename %>
+        </span>
+        <% if (profileUser.bio) { %>
+          <p class="bio"><%= profileUser.bio %></p>
+        <% } %>
+        <div class="profile-actions">
+          <% if (isOwn) { %>
+            <md-filled-tonal-button href="/profile/edit">
+              <span class="material-symbols-rounded" slot="icon">edit</span>
+              Edit profile
+            </md-filled-tonal-button>
+          <% } else { %>
+            <% if (relationship === 'none') { %>
+              <form action="/friends/request/<%= profileUser.id %>" method="POST" style="display: inline;">
+                <md-filled-tonal-button type="submit">
+                  <span class="material-symbols-rounded" slot="icon">person_add</span>
+                  Add friend
+                </md-filled-tonal-button>
+              </form>
+            <% } else if (relationship === 'outgoing') { %>
+              <md-outlined-button disabled>
+                <span class="material-symbols-rounded" slot="icon">schedule</span>
+                Request sent
+              </md-outlined-button>
+            <% } else if (relationship === 'incoming') { %>
+              <span style="color: var(--md-sys-color-on-primary-container); font-weight: 500;">Wants to be your friend — see Friends page</span>
+            <% } else if (relationship === 'friends') { %>
+              <md-outlined-button disabled>
+                <span class="material-symbols-rounded" slot="icon">check</span>
+                Friends
+              </md-outlined-button>
+            <% } %>
+          <% } %>
+        </div>
+      </div>
+    </section>
+
+    <section class="profile-stats">
+      <div class="profile-stat">
+        <div class="stat-value"><%= stats.post_count %></div>
+        <div class="stat-label">Secrets</div>
+      </div>
+      <div class="profile-stat">
+        <div class="stat-value"><%= stats.friend_count %></div>
+        <div class="stat-label">Friends</div>
+      </div>
+      <div class="profile-stat">
+        <div class="stat-value"><%= stats.reactions_received %></div>
+        <div class="stat-label">Reactions</div>
+      </div>
+    </section>
+
+    <% if (achievements && achievements.length > 0) { %>
+      <section class="profile-section">
+        <h3>Achievements</h3>
+        <div class="badge-grid">
+          <% achievements.forEach(function(a) { %>
+            <span class="badge gold" title="<%= a.description %>">
+              <span class="material-symbols-rounded"><%= a.icon %></span>
+              <%= a.name %>
+            </span>
+          <% }); %>
+        </div>
+      </section>
+    <% } %>
+
+    <section class="profile-section">
+      <h3>Secrets</h3>
+      <% if (!posts || posts.length === 0) { %>
+        <div class="feed-empty">
+          <span class="material-symbols-rounded">post_add</span>
+          <p>No secrets shared yet.</p>
+        </div>
+      <% } else { %>
+        <% posts.forEach(function(post) { %>
+          <%- include('partials/post-card', { post: post, user: user }) %>
+        <% }); %>
+      <% } %>
+    </section>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

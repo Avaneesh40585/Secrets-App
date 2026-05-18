@@ -1,0 +1,30 @@
+<%- include('partials/header') %>
+
+<main class="main-container">
+  <div class="bookmarks-page fade-in">
+    <div class="page-header">
+      <div>
+        <h2>Bookmarks</h2>
+        <p>Secrets you've saved</p>
+      </div>
+    </div>
+
+    <% if (!posts || posts.length === 0) { %>
+      <div class="feed-empty">
+        <span class="material-symbols-rounded">bookmark_border</span>
+        <h4>No bookmarks yet</h4>
+        <p>Tap the bookmark icon on any post to save it here.</p>
+        <md-filled-button href="/feed" style="margin-top: 16px;">
+          <span class="material-symbols-rounded" slot="icon">home</span>
+          Browse feed
+        </md-filled-button>
+      </div>
+    <% } else { %>
+      <% posts.forEach(function(post) { %>
+        <%- include('partials/post-card', { post: post, user: user }) %>
+      <% }); %>
+    <% } %>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

@@ -1,41 +1,144 @@
 <%- include('partials/header') %>
 
-<div class="main-container">
-  <div class="submit-form">
-    <div class="logo">
-      <i class="fas fa-user-secret fa-4x"></i>
-      <h1>Share a Secret</h1>
-      <p>What would you like to tell the world anonymously?</p>
-    </div>
+<main class="main-container">
+  <div class="submit-page fade-in">
+    <h2>Share a secret</h2>
+    <p>
+      <% if (typeof promptText !== 'undefined' && promptText) { %>
+        <span class="material-symbols-rounded size-16" style="color: var(--md-sys-color-primary);">auto_awesome</span>
+        Prompted: <em><%= promptText %></em>
+      <% } else { %>
+        What's something you've never told anyone?
+      <% } %>
+    </p>
 
-    <% if (currentSecret) { %>
-      <div class="current-secret-display">
-        <h3>Your Current Secret:</h3>
-        <div class="current-secret-text">
-          "<%= currentSecret %>"
+    <% if (typeof replyTo !== 'undefined' && replyTo) { %>
+      <div class="reply-context">
+        <span class="material-symbols-rounded">reply</span>
+        <div>
+          <strong>Replying to</strong> <em><%= replyTo.codename %></em><br>
+          <span style="opacity: 0.85;">"<%= replyTo.content.length > 100 ? replyTo.content.substring(0, 100) + '…' : replyTo.content %>"</span>
         </div>
-        <p class="update-note">Sharing a new secret will replace your current one.</p>
       </div>
     <% } %>
 
-    <form action="/submit" method="POST">
-      <textarea 
-        name="secret" 
-        placeholder="<%= currentSecret ? 'Enter your new secret here...' : 'Type your secret here...' %>" 
-        required
-        maxlength="500"
-      ><%= currentSecret || '' %></textarea>
-      
-      <div class="hero-buttons">
-        <button type="submit" class="btn btn-primary">
-          <%= currentSecret ? 'Update Secret' : 'Share Secret' %>
-        </button>
-        <a href="/secrets" class="btn btn-outline">Cancel</a>
+    <form action="/post/create" method="POST">
+      <% if (typeof replyTo !== 'undefined' && replyTo) { %>
+        <input type="hidden" name="parent_post_id" value="<%= replyTo.id %>">
+      <% } %>
+
+      <div class="form-section">
+        <md-filled-text-field
+          type="textarea"
+          rows="6"
+          name="content"
+          label="Your secret"
+          required
+          maxlength="500"
+          placeholder="Type something only you would say…"
+          style="width: 100%;"></md-filled-text-field>
+        <div class="char-count"><span id="charCount">0</span>/500</div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-label">
+          <span class="material-symbols-rounded size-20">category</span>
+          Category
+        </div>
+        <div class="chip-set" id="categoryChips">
+          <button type="button" class="chip selected" data-value="general">
+            <span class="material-symbols-rounded">check</span>General
+          </button>
+          <button type="button" class="chip" data-value="confession">
+            <span class="material-symbols-rounded">check</span>Confession
+          </button>
+          <button type="button" class="chip" data-value="funny">
+            <span class="material-symbols-rounded">check</span>Funny
+          </button>
+          <button type="button" class="chip" data-value="deep">
+            <span class="material-symbols-rounded">check</span>Deep
+          </button>
+          <button type="button" class="chip" data-value="advice">
+            <span class="material-symbols-rounded">check</span>Advice
+          </button>
+          <button type="button" class="chip" data-value="love">
+            <span class="material-symbols-rounded">check</span>Love
+          </button>
+        </div>
+        <input type="hidden" name="category" id="categoryInput" value="general">
+      </div>
+
+      <div class="form-section">
+        <div class="whisper-toggle">
+          <div class="toggle-label">
+            <strong>Whisper mode</strong>
+            <span>Post disappears after 10 people see it</span>
+          </div>
+          <md-switch id="whisperSwitch" name="is_whisper" value="true"></md-switch>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <md-text-button href="/feed" type="button">Cancel</md-text-button>
+        <md-filled-button type="submit" trailing-icon>
+          Share
+          <span class="material-symbols-rounded" slot="icon">send</span>
+        </md-filled-button>
       </div>
     </form>
   </div>
-</div>
+</main>
 
+<script>
+  // Category chip selection
+  document.querySelectorAll('#categoryChips .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('#categoryChips .chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      document.getElementById('categoryInput').value = chip.dataset.value;
+    });
+  });
+
+  // Char count for textarea
+  const tf = document.querySelector('md-filled-text-field[name="content"]');
+  const counter = document.getElementById('charCount');
+  if (tf && counter) {
+    tf.addEventListener('input', () => { counter.textContent = (tf.value || '').length; });
+  }
+
+  // Draft persistence
+  const draftKey = 'secrets-draft-' + (new URLSearchParams(location.search).get('reply') || 'new');
+  function restoreDraft() {
+    const saved = localStorage.getItem(draftKey);
+    if (!saved || !tf) return;
+    // Wait for MD component to be ready
+    customElements.whenDefined('md-filled-text-field').then(() => {
+      if (!tf.value) {
+        tf.value = saved;
+        if (counter) counter.textContent = saved.length;
+      }
+    });
+  }
+
+  // Pre-fill from prompt query param (overrides draft)
+  const promptParam = new URLSearchParams(location.search).get('prompt');
+  if (promptParam && tf) {
+    customElements.whenDefined('md-filled-text-field').then(() => {
+      if (!tf.value) tf.value = promptParam;
+    });
+  } else {
+    restoreDraft();
+  }
+
+  if (tf) {
+    tf.addEventListener('input', () => {
+      localStorage.setItem(draftKey, tf.value || '');
+      if (counter) counter.textContent = (tf.value || '').length;
+    });
+  }
+  document.querySelector('form')?.addEventListener('submit', () => {
+    localStorage.removeItem(draftKey);
+  });
+</script>
 
 <%- include('partials/footer') %>
-

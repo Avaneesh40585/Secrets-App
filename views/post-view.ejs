@@ -1,0 +1,32 @@
+<%- include('partials/header') %>
+
+<main class="main-container">
+  <div class="feed-page fade-in">
+    <md-text-button href="/feed" style="margin-bottom: 12px;">
+      <span class="material-symbols-rounded" slot="icon">arrow_back</span>
+      Back to feed
+    </md-text-button>
+
+    <div class="chain-thread">
+      <%- include('partials/post-card', { post: post, user: user }) %>
+
+      <% if (replies && replies.length > 0) { %>
+        <h3 style="margin: 16px 0 8px;">Chain (<%= replies.length %>)</h3>
+        <% replies.forEach(function(reply) { %>
+          <div style="margin-left: 24px;">
+            <%- include('partials/post-card', { post: reply, user: user }) %>
+          </div>
+        <% }); %>
+      <% } %>
+    </div>
+
+    <div style="text-align: center; margin-top: 24px;">
+      <md-filled-button href="/submit?reply=<%= post.id %>">
+        <span class="material-symbols-rounded" slot="icon">reply</span>
+        Reply with your own secret
+      </md-filled-button>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

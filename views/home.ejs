@@ -1,19 +1,41 @@
 <%- include('partials/header') %>
 
-<div class="main-container">
-  <div class="hero">
-    <div class="logo">
-      <i class="fas fa-user-secret fa-4x"></i>
-      <h1>Secrets</h1>
-      <p>Share your thoughts anonymously with the world</p>
+<main class="main-container">
+  <section class="hero fade-in">
+    <img class="hero-logo" src="/assets/icons/favicon.png" alt="Secrets logo">
+
+    <h1 class="hero-title">Share secrets,<br>stay anonymous.</h1>
+
+    <p class="hero-subtitle">A safe space to share what you can't say out loud — anonymously, with people you may never know.</p>
+
+    <div class="hero-actions">
+      <md-filled-button href="/register">
+        Get started
+        <span class="material-symbols-rounded" slot="icon">arrow_forward</span>
+      </md-filled-button>
+      <md-outlined-button href="/login">Sign in</md-outlined-button>
     </div>
-    
-    <div class="hero-buttons">
-      <a href="/register" class="btn btn-primary">Get Started</a>
-      <a href="/login" class="btn btn-outline">Sign In</a>
+  </section>
+
+  <div style="width: 100%; max-width: 640px; margin-bottom: 48px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px;">
+      <div class="form-section" style="display: flex; flex-direction: column; gap: 8px;">
+        <span class="material-symbols-rounded sz-24 filled" style="color: var(--md-sys-color-primary);">mask</span>
+        <div style="font-size: 14px; font-weight: 500; color: var(--md-sys-color-on-surface);">Anonymous</div>
+        <div style="font-size: 13px; color: var(--md-sys-color-on-surface-variant);">Codenames rotate weekly. No one knows it's you.</div>
+      </div>
+      <div class="form-section" style="display: flex; flex-direction: column; gap: 8px;">
+        <span class="material-symbols-rounded sz-24 filled" style="color: var(--md-sys-color-primary);">timer</span>
+        <div style="font-size: 14px; font-weight: 500; color: var(--md-sys-color-on-surface);">Whispers</div>
+        <div style="font-size: 13px; color: var(--md-sys-color-on-surface-variant);">Posts that disappear after a set number of views.</div>
+      </div>
+      <div class="form-section" style="display: flex; flex-direction: column; gap: 8px;">
+        <span class="material-symbols-rounded sz-24 filled" style="color: var(--md-sys-color-primary);">thumb_up</span>
+        <div style="font-size: 14px; font-weight: 500; color: var(--md-sys-color-on-surface);">Reactions</div>
+        <div style="font-size: 13px; color: var(--md-sys-color-on-surface-variant);">Show empathy and build connection.</div>
+      </div>
     </div>
   </div>
-</div>
+</main>
 
 <%- include('partials/footer') %>
-
