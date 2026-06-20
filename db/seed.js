@@ -9,7 +9,7 @@
  */
 
 import bcrypt from 'bcrypt';
-import { pool } from './index.js';
+import { pool, initializeDatabase } from './index.js';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -47,6 +47,8 @@ async function insertHashtags(client, postId, content) {
 
 async function seed() {
   const client = await pool.connect();
+
+  await initializeDatabase();
 
   try {
     // Guard: exit if demo data already exists
